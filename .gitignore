@@ -1,0 +1,20 @@
+# Agent tooling / local workspace artifacts
+.claude/
+.omc/
+.playwright-mcp/
+
+# Temp / scratch files
+_*.html
+_*.txt
+*.tmp
+
+# OS
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# Editor
+.vscode/
+.idea/
+*.swp
+*~

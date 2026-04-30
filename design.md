@@ -335,22 +335,34 @@ col_after:   flex-column, bg linear-gradient(bgSurface → accentPurple10), padd
 
 ## 11. 구현 체크리스트 (Do's & Don'ts)
 
+> 이 섹션은 `lesson_learned.md` 의 누적 피드백을 반영합니다.
+
 ### Do
 - ✅ `deck_stage.js` 로 덱 스캐폴드 생성
 - ✅ `TYPE_SCALE`, `SPACING`, `COLORS` 를 `tokens.js` 에 한 번만 정의하고 모든 컴포넌트가 import
+- ✅ **인라인 `font-size:` 는 토큰 값 6개만**: `{24, 28, 40, 56, 80, 96, 160}` px. 그 외 모두 금지
+- ✅ 가능하면 클래스 (`.body`, `.caption`, `.subsection`, `.section-h`, `.title`, `.title-lg`) 우선
 - ✅ 제목 문법 스타일 통일 (명사구 OR 서술문, 섞지 않기)
 - ✅ 섹션 디바이더는 모든 섹션에서 동일 구조
 - ✅ 페이지 번호·풋터는 모든 슬라이드 동일 위치
 - ✅ 한글 본문은 `word-break: keep-all; text-wrap: pretty;`
+- ✅ accent 강조: 한 슬라이드에서 eyebrow / 라벨 / 강조어 / 박스 모두 **같은 한 색**
+- ✅ 도구별 키워드(`CLAUDE.md`, `GEMINI.md`, `.claude/`, `agents/`)는 직전 슬라이드의 컨텍스트와 정합 확인
 
 ### Don't
 - ❌ `position: absolute` / `inset` 을 `<section>` 에 직접 부여 (deck-stage가 처리)
 - ❌ 24px 미만 텍스트
-- ❌ 한 슬라이드에 accent 색 2개
-- ❌ 좌측 accent border 카드, 느낌표 뱃지
-- ❌ 이모지, 3D 그라디언트, 글래스모피즘
+- ❌ **한 슬라이드에 accent 색 2개 이상** (purple+cyan, amber+cyan, 3색 동시 등 모두 위반). 보조 차별화는 `text-secondary / text-tertiary` 회색만
+- ❌ **좌측 accent border 카드** (`border-left:` 키워드 자체를 코드에서 검색해 0건이어야 함). 강조는 full border, 배경 그라디언트, 상단/하단 4px 띠 로
+- ❌ **이모지 + 유니코드 dingbats**: ✏ ✓ ✗ ★ ⚡ 🚀 등 emoji-rendering 문자 모두 금지. 화살표는 `→ ↓ ↑` 같은 텍스트 글자로만
+- ❌ **임의 폰트 크기** (22, 26, 30, 32, 34, 36, 44, 48 px 등)
+- ❌ **eyebrow 에 시간/단계/속도** (`00:00–02:00`, `Act 1`, `Step 03` 모두 강사 진행표 — 청중에게 노출 X). eyebrow 는 의미 라벨만
+- ❌ **horizontal flex 항목 5개 이상** (1720px content 영역 overflow). `.steps` 는 3–4개 한정
 - ❌ 동일 레이아웃 3연속
 - ❌ "It's not X. It's Y." / "마법 같은 순간" 류 카피
+- ❌ **도구 컨텍스트 미스매치** — Antigravity 실습 슬라이드 옆에 Claude Code `.claude/` 폴더 표기, GEMINI.md 가 `.claude/` 안에 들어있는 식의 모순
+- ❌ **한국어를 `var(--font-mono)` 로 렌더** — JetBrains Mono 는 Latin 전용 → 한국어가 시스템 fallback 으로 떨어져 폭/굵기 부조화. mono 는 파일명·경로·명령·영문 라벨에만, 한국어 섞이면 `<span>` 으로 분리
+- ❌ **다이어그램을 mono 텍스트 행으로 표현** — `검색<br>↓<br>요약<br>↓` 식은 코드 블록. 다이어그램은 **pill 노드(`bg-elevated` rounded-14px padding 14×36) + 화살표 connector** 로
 
 ---
 

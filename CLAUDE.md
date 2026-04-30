@@ -37,21 +37,80 @@
 
 ## 3. 절대 규칙 (Hard Rules)
 
+> 이 규칙들은 `lesson_learned.md` 의 누적 피드백을 반영합니다. 새 슬라이드 작성 전 lesson_learned.md 를 먼저 읽으세요.
+
+### ⚡ 최우선 룰 — Prompter ↔ index.html 동기화 (Rule R-12)
+
+**`index.html` 의 슬라이드 콘텐츠가 변경되면, 같은 작업 단위 안에서 반드시 `Prompter.html` 의 `scripts` 배열도 갱신한다.** 예외 없음.
+
+| 변경 유형 | Prompter 갱신 의무 |
+|---|---|
+| 슬라이드 추가 | 같은 인덱스 위치에 `{ title, text }` 객체 삽입 |
+| 슬라이드 삭제 | 해당 객체 제거 |
+| 슬라이드 재배치 | 객체 순서 동일하게 재정렬 |
+| 슬라이드 본문 수정 (도구 키워드, 톤, 핵심 메시지 변경) | `text` 필드 같이 갱신 |
+| 슬라이드 `data-label` 변경 | `title` 필드 같이 갱신 |
+| 슬라이드 디자인만 변경 (대본 영향 없음) | 갱신 불필요 — 단, 판단 후 명시적으로 "Prompter 변경 없음" 보고 |
+
+**왜 강제인가**: Prompter 의 `goSlide(idx)` 는 인덱스 기반으로 BroadcastChannel + iframe postMessage 로 sync. 인덱스가 1만 어긋나도 강사가 보는 대본과 청중 슬라이드가 도미노로 어긋나 강의가 망함.
+
+**검증 명령** (작업 종료 전 반드시 실행):
+```powershell
+$ix = (Select-String -Path index.html -Pattern 'data-label="').Count
+$pr = (Select-String -Path Prompter.html -Pattern '^        \{ title: "').Count
+"index: $ix / prompter: $pr — 같아야 함 (Cover 등 의도된 title 차이는 OK)"
+```
+
+신규 대본 톤은 `lesson_learned.md` 의 "톤 작성 가이드" 참조 (위트 + 시니컬 + `<b>` 1–2회 + 3–5문장).
+
 ### 해도 되는 것
 - `design.md` 에 정의된 컬러 토큰, 타입 스케일, 스페이싱, 컴포넌트만 사용
-- 강조가 필요할 때 **accent 3색** (`purple / cyan / amber`) 중 **슬라이드당 최대 1색**만 사용
+- 강조가 필요할 때 **accent 3색** (`purple / cyan / amber`) 중 **슬라이드당 1색만** — eyebrow / 라벨 / 강조어 / 박스 모두 같은 한 색
 - 실제 이미지가 없으면 **#1C1C1E 배경 + 모노톤 placeholder** 사용
 - 한 덱 안에서 레이아웃 블루프린트는 **4~6개 내에서 반복** (리듬 확보)
+- 보조/부속 텍스트는 `text-secondary (#8E8E93)` / `text-tertiary (#5A5A60)` 회색만 사용 (다른 accent 색으로 보조 텍스트 만들지 말 것)
 
 ### 하면 안 되는 것
 - ❌ 새로운 색상 발명 (임의 hex 금지). 필요하면 `oklch()` 로 기존 팔레트 변형
-- ❌ 이모지 사용 (브랜드에 없음)
-- ❌ 24px 미만 본문, 48px 미만 제목
+- ❌ **한 슬라이드에 accent 색 2종 이상** (purple+cyan, amber+cyan 등 모두 금지)
+- ❌ **이모지 / 유니코드 dingbats / emoji-rendering 문자** — 예: ✏ ✓ ✗ ★ ⚡ 등 모두 금지. ASCII (`*`, `+`, `-`, `>`) 와 화살표 텍스트(`→`, `↓`, `↑`) 만 허용
+- ❌ **TYPE_SCALE 외 임의 폰트 크기.** 인라인 `font-size:` 는 `{24, 28, 40, 56, 80, 96, 160}` 6개 값만 허용. 22/26/30/32/34/36/44/48 등 금지. 가능하면 클래스 사용 (`.body`, `.caption`, `.subsection`, `.section-h`, `.title`, `.title-lg`)
+- ❌ **`border-left:` 으로 좌측 accent 띠 추가** — 키워드 자체를 검색해 0건이어야 함. 강조는 (a) full border, (b) 배경 그라디언트, (c) 상단/하단 4px 띠 중 하나
+- ❌ **eyebrow 에 시간 / 진행 단계 / 길이 표기** — `00:00–02:00`, `Act 1`, `Step 03` 같은 강사용 진행표 정보 금지. eyebrow 는 의미 라벨만 (예: `HANDS-ON PRACTICE`, `워크플로우 설계도`)
+- ❌ **horizontal flow 에 항목 5개 이상** — `.steps` 는 3~4개 한정. 5개 이상은 수직 리스트 또는 2분할로
 - ❌ `<section>` 에 직접 `position / inset / width / height` 지정 (deck-stage 가 처리)
-- ❌ 그라디언트 남발, 좌측 accent border 카드, "It's not X. It's Y." 식 카피
-- ❌ 이모지로 아이콘 대체
+- ❌ 그라디언트 남발, "It's not X. It's Y." 식 카피
 - ❌ 슬라이드 하나에 글머리표 5개 초과
+- ❌ **도구 컨텍스트 미스매치** — 직전 슬라이드가 Antigravity 라면 이 슬라이드도 Antigravity 컨텍스트(GEMINI.md 등). Claude Code 의 `.claude/` 폴더, `CLAUDE.md` 같은 도구 전용 경로/파일을 컨텍스트 확인 없이 쓰지 않는다
+- ❌ **한국어 텍스트에 `var(--font-mono)` 적용** — JetBrains Mono 는 Latin 전용. 한국어가 시스템 fallback 으로 떨어져 흉한 혼합 렌더가 나온다. mono 는 파일명·경로·명령·영문 라벨에만. 한국어가 섞이면 `<span>` 으로 mono 영역만 분리 (예: `<span style="font-family:var(--font-mono)">AGENT.md</span> 생성`)
+- ❌ **다이어그램을 mono 텍스트 줄로 표현** — `검색<br>↓<br>요약<br>↓<br>디자인` 식의 모노 박스는 코드 블록이지 다이어그램이 아님. 다이어그램은 **pill/박스 노드 + 화살표 connector** 로 표현
 - ❌ `styles` 라는 전역 이름 사용 (컴포넌트마다 고유 이름: `titleSlideStyles`, `agendaStyles` …)
+
+### 슬라이드 검수 체크리스트 (each slide pre-flight)
+
+```
+[ ] 1. eyebrow 에 시간/속도/단계번호 없음
+[ ] 2. accent 색 = 1종 (eyebrow/라벨/강조 모두 동일)
+[ ] 3. `border-left:` 키워드 0건
+[ ] 4. 인라인 font-size = {24, 28, 40, 56, 80, 96, 160} 중 하나
+[ ] 5. 이모지/dingbats 0건
+[ ] 6. horizontal flex 항목 ≤ 4개
+[ ] 7. 직전 슬라이드와 도구 컨텍스트 일관
+[ ] 8. 1720px content 영역(padding 100px 양쪽) 안에서 overflow 없음
+[ ] 9. 한국어가 `var(--font-mono)` 안에 들어가 있지 않음 (`grep -E "font-mono.*[가-힣]"` 0건)
+[ ] 10. 다이어그램은 pill 노드 + 화살표로 시각화 (mono 텍스트 줄 X)
+```
+
+### 구조 변경 (슬라이드 추가/삭제) 시 정합성 검증
+
+```
+[ ] A. 모든 슬라이드 footer 의 분모가 최종 슬라이드 수와 동일
+[ ] B. Cover 슬라이드의 "총 X 슬라이드" meta 도 동일
+[ ] C. `grep -c data-label=` 결과와 분모가 동일
+[ ] D. 후반부(실습 후)는 **검증 → section divider → 티저 → 마무리** 4박자, 8장 이내
+[ ] E. **Prompter.html `scripts` 배열 동시 갱신** — index.html 의 `data-label` 78개와 prompter `title` 78개가 1:1 매핑 (Cover 등 의도적 예외 제외). 슬라이드 인덱스 미스매치는 BroadcastChannel sync 를 깨뜨려 도미노 오정렬을 일으킴
+[ ] F. **sync bridge listener 양쪽 존재 검증** — index.html 끝부분에 `window.addEventListener('message', ...)` + `new BroadcastChannel('ai_literacy_sync')` 가 있는지. 한쪽이라도 빠지면 Prompter postMessage / BC 가 무시됨
+```
 
 ---
 
@@ -124,10 +183,17 @@
 2. 슬라이드마다 `padding` 이 `SPACING.paddingX=100` 이상인가?
 3. 본문 텍스트가 28px 이상인가?
 4. accent 색이 한 슬라이드에 2개 이상 들어가 있지는 않은가?
-5. 웹 느낌(카드 그림자 남발, rounded-2xl 만 사용 등)이 아니라 **프레젠테이션 느낌**인가?
-6. 빈 공간이 두렵지 않은가? (아래쪽 여백은 의도된 것 — 채우지 마세요)
+5. eyebrow 에 시간 / 단계 번호가 없는가?
+6. 코드에서 `border-left:` 검색 시 0건인가?
+7. 인라인 `font-size:` 가 모두 {24, 28, 40, 56, 80, 96, 160} 중 하나인가?
+8. 이모지 / 유니코드 dingbats(✏ ✓ ✗ 등)가 없는가?
+9. 웹 느낌(카드 그림자 남발, rounded-2xl 만 사용 등)이 아니라 **프레젠테이션 느낌**인가?
+10. 빈 공간이 두렵지 않은가? (아래쪽 여백은 의도된 것 — 채우지 마세요)
+11. 도구 컨텍스트가 직전 슬라이드와 일관 (Claude Code / Antigravity / Gemini)?
 
 그 다음 `done(path)` → `fork_verifier_agent()` 순서로 마무리합니다.
+
+**작업 후 lesson_learned.md 업데이트:** 사용자가 새 피드백을 주면 즉시 lesson_learned.md 에 기록하고, 룰화할 만하면 본 §3 절대 규칙에 반영합니다.
 
 ---
 
