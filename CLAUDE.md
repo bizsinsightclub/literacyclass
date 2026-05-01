@@ -85,6 +85,12 @@ $pr = (Select-String -Path Prompter.html -Pattern '^        \{ title: "').Count
 - ❌ **한국어 텍스트에 `var(--font-mono)` 적용** — JetBrains Mono 는 Latin 전용. 한국어가 시스템 fallback 으로 떨어져 흉한 혼합 렌더가 나온다. mono 는 파일명·경로·명령·영문 라벨에만. 한국어가 섞이면 `<span>` 으로 mono 영역만 분리 (예: `<span style="font-family:var(--font-mono)">AGENT.md</span> 생성`)
 - ❌ **다이어그램을 mono 텍스트 줄로 표현** — `검색<br>↓<br>요약<br>↓<br>디자인` 식의 모노 박스는 코드 블록이지 다이어그램이 아님. 다이어그램은 **pill/박스 노드 + 화살표 connector** 로 표현
 - ❌ `styles` 라는 전역 이름 사용 (컴포넌트마다 고유 이름: `titleSlideStyles`, `agendaStyles` …)
+- ❌ **외부 도구·제품명·가격을 기억으로 작성** — 예: "Anthropic Claude Cowork" (존재 안 함, 실제는 Claude for Work), "Max $200/월" (실제는 $100/$200 두 단계). 제품 라인 / 가격 / 용어 정의는 슬라이드 작성 시 web search 로 1차 검증. 도구는 1년 안에 빠르게 변함. (R-17)
+- ❌ **개념 슬라이드에 코드 파일명·확장자·기술 어휘 직접 노출** — `skill.md`, `agents/*.md`, "인스턴스", "페르소나에 빙의" 등은 비개발자 청중에게 막힌다. 개념 슬라이드는 메타포로 ("역할 설명서", "업무 매뉴얼", "그때만 살아있는 직원"), 도구 매뉴얼 슬라이드 (Ch3.5 실습) 에서만 코드 표현 등장. (R-19)
+- ❌ **"불가능 / 안 됨 / 지원 안 함" 단정형** — 시대 흐름 6개월 안에 뒤집힐 가능성. 예: "ChatGPT 채팅창에서 병렬 불가능" → "1차 기능은 아님 (ChatGPT Tasks 같은 신기능은 흉내 가능, 직접 쓰면 고수 인정)". **현재 우세 + 예외 인정** 톤으로. 청중 중 고급 사용자도 화나게 안 한다. (R-20)
+- ❌ **신기술 / 진화 흐름을 단점·비용 언급 없이 묘사** — 멀티에이전트가 단일 호출의 무조건적 진화처럼 적지 말 것. Anthropic 측정으로 멀티에이전트는 **토큰 10~15배**. 같은 슬라이드 (또는 직후) 에 비용·복잡도·실패 모드 한 줄 의무. (R-21)
+- ❌ **2개 도구를 한 강의에서 다룰 때 한 번만 선언하고 끝** — 본 강의처럼 A안 (Antigravity 실습) / B안 (Claude Code 본격) 로 한 번 선언했다고 끝나지 않는다. B안 풍경 슬라이드에는 eyebrow / 캡션 / 코드 코멘트로 "B안 기준" 임을 다시 짚어준다. 청중 머릿속의 컨텍스트는 슬라이드마다 리셋된다. (R-18)
+- ❌ **외국 도시·인물 가상 사례** (가능한 경우) — 청중 즉시 이해 우선. 파리(켄터키 vs 프랑스) 같은 영어권 사례는 한국 청중에게 한 박자 늦다. 가능하면 동음이의 도시 (광주광역시 vs 경기도 광주, 김포 vs 강화도, 부산 해운대 vs 강원 해운정 등) 로 교체.
 
 ### 슬라이드 검수 체크리스트 (each slide pre-flight)
 
@@ -99,6 +105,11 @@ $pr = (Select-String -Path Prompter.html -Pattern '^        \{ title: "').Count
 [ ] 8. 1720px content 영역(padding 100px 양쪽) 안에서 overflow 없음
 [ ] 9. 한국어가 `var(--font-mono)` 안에 들어가 있지 않음 (`grep -E "font-mono.*[가-힣]"` 0건)
 [ ] 10. 다이어그램은 pill 노드 + 화살표로 시각화 (mono 텍스트 줄 X)
+[ ] 11. 외부 제품명·가격·기술 정의는 web search 로 검증 (R-17)
+[ ] 12. 비개발자 청중 슬라이드는 코드 파일명·확장자 노출 0건 (R-19)
+[ ] 13. "불가능 / 안 됨" 단정 → "1차 기능 아님 / 메인 흐름 아님" 으로 톤다운 (R-20)
+[ ] 14. 신기술 / 진화 묘사 슬라이드에 단점·비용 한 줄 동반 (R-21)
+[ ] 15. 2개 도구 강의면 슬라이드 단위로 어느 도구 기준인지 명시 (R-18)
 ```
 
 ### 구조 변경 (슬라이드 추가/삭제) 시 정합성 검증
@@ -107,9 +118,12 @@ $pr = (Select-String -Path Prompter.html -Pattern '^        \{ title: "').Count
 [ ] A. 모든 슬라이드 footer 의 분모가 최종 슬라이드 수와 동일
 [ ] B. Cover 슬라이드의 "총 X 슬라이드" meta 도 동일
 [ ] C. `grep -c data-label=` 결과와 분모가 동일
-[ ] D. 후반부(실습 후)는 **검증 → section divider → 티저 → 마무리** 4박자, 8장 이내
-[ ] E. **Prompter.html `scripts` 배열 동시 갱신** — index.html 의 `data-label` 78개와 prompter `title` 78개가 1:1 매핑 (Cover 등 의도적 예외 제외). 슬라이드 인덱스 미스매치는 BroadcastChannel sync 를 깨뜨려 도미노 오정렬을 일으킴
+[ ] D. 후반부(실습 후)는 **검증 → section divider → 티저 → 한계 → 액션 → 마무리** 6박자 (한계·액션 추가, R-23)
+[ ] E. **Prompter.html `scripts` 배열 동시 갱신** — index.html 의 `data-label` 개수와 prompter `title` 개수가 1:1 매핑 (Cover 등 의도적 예외 제외). 슬라이드 인덱스 미스매치는 BroadcastChannel sync 를 깨뜨려 도미노 오정렬을 일으킴
 [ ] F. **sync bridge listener 양쪽 존재 검증** — index.html 끝부분에 `window.addEventListener('message', ...)` + `new BroadcastChannel('ai_literacy_sync')` 가 있는지. 한쪽이라도 빠지면 Prompter postMessage / BC 가 무시됨
+[ ] G. **개념(Ch1~3) → 실습(Ch3.5) 강의면 둘 사이에 "다리(bridge) 슬라이드" 1장** — "지금까지 배운 X 가 어디로 들어가나" 매핑. 없으면 청중은 실습 슬라이드를 새 정보로 받음 (R-22)
+[ ] H. **마무리 시퀀스 = 한계+비용 → 구체 액션 아이템 → 마치며 → QnA**. "할 수 있는 것" 만 보여주고 끝내면 강사 신뢰도 ↓. 한계 슬라이드 1장 + 액션 슬라이드 1장이 retention 결정적 (R-23)
+[ ] I. **N장 삽입 후 페이지 번호 갱신**: (1) 분모 일괄 변경 (`replace_all`), (2) 영향받는 분자만 **역순 시프트** (가장 높은 번호부터), (3) 중복 케이스는 다음 섹션 코멘트나 `data-label` 을 anchor 로 disambiguate. 정방향 시프트 시 충돌 발생 (R-24)
 ```
 
 ---

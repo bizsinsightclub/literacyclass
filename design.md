@@ -284,6 +284,51 @@ col_after:   flex-column, bg linear-gradient(bgSurface → accentPurple10), padd
 - 우측 7fr: `BarChart` (5~7 막대)
 - 축 라벨은 `caption`
 
+### 6.11 `BridgeMapping` — 개념↔실습 다리 슬라이드
+**용도**: 개념 챕터(Ch1~3)와 실습 챕터(Ch3.5) 사이에 둬서 청중 인지 부하를 낮춘다. "지금까지 배운 X 가 실습 파일 Y 로 들어간다" 매핑.
+
+```
+title:    "지금까지 배운 것이, 어디에 들어가나."
+caption:  매핑이 어디로 향하는지 한 줄
+recipe (3-card grid):
+  card_n:
+    cnum:   "Ch.0X — 키워드"        // accent 한 가지
+    ctitle: 챕터의 핵심 개념 (subsection)
+    csub:   한 줄 설명
+    ex:     mono span — "→ FILENAME.md"
+caption (하단): "이 매핑만 머리에 들어오면, 다음 슬라이드에서 X 가 갑자기 나와도 안 헷갈립니다."
+```
+**규칙**: 단일 accent (보통 amber 또는 직전 챕터 색). 카드 3장 이내. 각 카드의 `ex` 영역만 mono 허용 (Latin 파일명).
+
+### 6.12 `LimitsTriple` — 한계·비용·검증 3카드
+**용도**: 마무리 직전, 가능성만 보여주고 끝내지 않도록 한계와 검증 책임을 명시.
+
+```
+eyebrow: "잊지 말 것" (amber)
+title:   "가능성만 봤습니다.\n한계도 봐야 합니다."
+recipe (3-card):
+  - 한계 1 (예: 할루시네이션) — 한 줄 진단 + 검증 액션
+  - 한계 2 (예: 토큰 비용)  — 정량 데이터 + 적용 범위
+  - 한계 3 (예: 검증 루틴)  — 5초 의심 / 손으로 한 번
+caption: 책임을 강조하는 한 줄
+```
+**규칙**: 단일 accent amber. "할 수 있는 것" 슬라이드와 같은 시각 무게로 배치 — 약하게 처리하면 무시당함.
+
+### 6.13 `TakeawaysList` — 액션 아이템 5
+**용도**: Final Closing 직전. 청중이 "월요일 아침" 부터 따라할 수 있는 구체 액션.
+
+```
+eyebrow: "오늘 가져갈 다섯 가지" (purple 권장)
+title:   시간·요일 명시 ("월요일 아침,\n이 다섯 줄로 시작하세요.")
+bullets (5개):
+  bullet_n:
+    idx:  "0N"                 // mono, accent
+    txt:
+      <b>액션 동사 + 무엇</b>
+      <span>한 줄 설명 — 챕터 출처</span>
+```
+**규칙**: 정확히 5개 (4개도 6개도 아님 — 손에 꼽힌다는 인지 효과). 각 bullet 끝에 챕터 출처 (`Ch.1`, `Ch.2` 등) 명시. 단일 accent.
+
 ---
 
 ## 7. 그리드 & 안전영역 (Safe Area)
@@ -309,6 +354,21 @@ col_after:   flex-column, bg linear-gradient(bgSurface → accentPurple10), padd
 - **한 덱에서 accent 주 색은 1개**, 보조로 1개 더(숫자용)까지.
 - 그라디언트는 `linear-gradient(bgSurface, accent10%)` 처럼 **지극히 은은하게**. 네온·과채도 금지.
 - 텍스트는 99% 의 경우 흰색. 보조 설명만 `textSecondary`.
+
+### 마무리 시퀀스 색상 흐름 (R-23 권장)
+
+실습 → 마무리 시퀀스의 정서 흐름을 색으로 매핑:
+
+| 슬라이드 | accent | 정서 |
+|---|---|---|
+| 후반부 진입 디바이더 ("조감도") | purple | 한 발짝 떨어짐 |
+| 다음 단계 티저 (4-카드) | purple | 가능성 |
+| 시리즈 요약 (Series Summary) | amber | 정리 / 회고 |
+| **한계와 비용** (LimitsTriple) | amber | 책임 / 무게 |
+| **5가지 액션 아이템** (TakeawaysList) | purple | 행동 / 출발 |
+| 마치며 (Final Closing) | mixed (3색 절제 사용) | 종합 마무리 |
+
+**원칙**: 한계 슬라이드 = amber (경고/책임 톤), 액션 슬라이드 = purple (출발/추진 톤). 한 슬라이드 안에서는 여전히 단일 accent 룰 유지.
 
 ---
 
