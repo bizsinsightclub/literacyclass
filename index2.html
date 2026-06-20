@@ -315,6 +315,9 @@
   }
   .card .ex .no{color:var(--text-tertiary);text-decoration:line-through;display:block;margin-bottom:8px;}
   .card .ex .yes{color:var(--accent-purple);display:block;}
+  /* 19p 네 재료 — 카드 자연 높이 + 예시 박스 균일(시작·높이 통일) */
+  .recipe.four-ing{flex:none;margin-top:auto;margin-bottom:auto;}
+  .recipe.four-ing .ex{min-height:240px;margin-top:0;}
 
   /* 3-step workflow */
   .steps{display:flex;gap:40px;margin-top:72px;flex:1;align-items:stretch;}
@@ -769,7 +772,7 @@
       </div>
       <div class="caption" style="max-width:520px;text-align:right;">다 넣을 필요는 없지만,<br>알고 빼는 것과 모르고 빼는 건 다릅니다.</div>
     </div>
-    <div class="recipe">
+    <div class="recipe four-ing">
       <div class="card">
         <div class="cnum">01 / Role</div>
         <div class="ctitle">역할</div>
@@ -960,9 +963,9 @@
       그런데 받아본 결과물은 — 어딘가 ‘우리 것’이 아닙니다.
     </div>
     <div class="bullets" style="margin-top:48px;">
-      <div class="bullet"><div class="idx" style="color:var(--accent-cyan);">“</div><div class="txt"><span>우리 팀이 절대 안 쓰는 말투야.</span></div></div>
-      <div class="bullet"><div class="idx" style="color:var(--accent-cyan);">“</div><div class="txt"><span>우리 클라이언트한테 이런 표현 쓰면 바로 클레임 들어오는데.</span></div></div>
-      <div class="bullet"><div class="idx" style="color:var(--accent-cyan);">“</div><div class="txt"><span>이 업계에서 이걸 이렇게 설명하면, 아마추어처럼 보이는데.</span></div></div>
+      <div class="bullet"><div class="txt"><span>“우리 팀이 절대 안 쓰는 말투야.”</span></div></div>
+      <div class="bullet"><div class="txt"><span>“우리 클라이언트한테 이런 표현 쓰면 바로 클레임 들어오는데.”</span></div></div>
+      <div class="bullet"><div class="txt"><span>“이 업계에서 이걸 이렇게 설명하면, 아마추어처럼 보이는데.”</span></div></div>
     </div>
     <div class="caption" style="margin-top:56px;max-width:1500px;">AI가 틀린 게 아닙니다. <b style="color:#fff;">우리 회사를 모르는 것</b> 뿐입니다.</div>
     <div class="footer"><div class="page">28 / 80</div></div>
@@ -1011,7 +1014,7 @@
     <div style="background:var(--bg-surface);border-radius:20px;padding:52px 64px;margin-top:40px;flex:1;display:flex;flex-direction:column;justify-content:center;gap:32px;">
       <div style="display:flex;gap:32px;align-items:flex-start;">
         <div style="font-family:var(--font-mono);font-size:24px;font-weight:600;color:var(--accent-cyan);letter-spacing:0.12em;min-width:140px;padding-top:6px;">REQUEST</div>
-        <div style="font-size:36px;line-height:1.45;font-weight:500;">“비누 브랜드 ‘Dove’ 신제품<br>런칭 카피 한 줄 써줘.”</div>
+        <div style="font-size:36px;line-height:1.45;font-weight:500;">“이번에 P&amp;G Dove 신제품 관련<br>카피 한 줄 제안해줘.”</div>
       </div>
       <div style="height:1px;background:rgba(255,255,255,0.08);"></div>
       <div style="display:flex;gap:32px;align-items:flex-start;">
