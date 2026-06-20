@@ -896,7 +896,10 @@ After:
 - **오디오 페이드**: `setInterval`(80ms)로 `currentTime` 감시, 18s부터 `volume=(20-t)/2`, 20s에 0+pause. stop/재생 때 `volume=1` 리셋 + interval clear.
 - **푸터 여백 일괄 확보(~35px)**: 거의 모든 콘텐츠 슬라이드가 `.split/.ba/.recipe/.steps`(전부 `flex:1`) 때문에 본문 하단이 footer.top 대비 gap 8px까지 바짝 붙음. **단일 레버** = `section.slide` 하단 패딩 80→105 (footer는 `position:absolute;bottom:40` 불변) → flex:1 블록이 25px 덜 늘어 자동 상승, 여백 있는 슬라이드 일괄 해결. **함정**: 여백 없이 꽉 찬 dense 슬라이드(번호 그리드 등)는 10~14px clipping → `section.slide.tight-bottom{padding-bottom:80px}` 예외 클래스로 원복(이들은 "여백 많은" 케이스 아님). Playwright로 `scrollHeight-clientHeight` 전수 스윕해 예외 대상 식별.
 - **내부 여백을 예시박스로 채우기**: flex:1+align-items:stretch로 늘어난 카드의 빈 하단을, 설명 다음 예시 블록에 `margin-top:auto`를 줘 바닥에 정렬 → 상단 설명/하단 예시 2단 분포로 여백 해소(20p 역할 예시). 후략은 표준 `…`(U+2026, 이모지 아님; 덱에 기존 사용).
-- **박스 높이 통일은 스코프 클래스+min-height**: 3카드 하단 예시박스 높이 제각각 → `.recipe`에 `three-kinds` 클래스 + `.recipe.three-kinds .ex{min-height:160px}` (19p `four-ing` 패턴 재사용). min-height는 **가장 긴 박스의 실측 자연높이 이상**으로(3줄=156 → 160). 공유 CSS(.ex) 직접 수정 금지 — 다른 슬라이드 오염.
+- **박스 높이 통일은 스코프 클래스+min-height**: 3카드 하단 예시박스 높이 제각각 → `.recipe`에 `three-kinds` 클래스 + `.recipe.three-kinds .ex{min-height:160px}` (19p `four-ing` 패턴 재사용). min-height는 **가장 긴 박스의 실측 자연높이 이상**으로(3줄=156 → 160). 공유 CSS(.ex) 직접 수정 금지 — 다른 슬라이드 오염. 좌우 인용박스도 동일 — 둘 다 같은 `min-height`(긴 쪽 실측+여유)로 주면 크기 통일(34p 89/166 → 168/168), 짧은 쪽은 top-align 빈공간이 오히려 "정보 적음"을 강조.
+- **표지/대형 디스플레이 자간은 design.md 룰 준수**: design.md = 한글 `-0.01em`, 영문 `-0.02em` 기준. `.cover-big`의 `-0.045em`은 둘 다보다 과밀 → 96px 미만 줄에선 글자 붙어 보임. 서브히어로(88px) 영문 줄은 `letter-spacing:-0.02em`(Latin 기준)으로 풀어야 자연스러움. 최대 히어로(160px+)만 타이트 유지 가능.
+- **2x2 사분면 플로우(flow-quad)**: 세로 일렬 노드(검색→요약→디자인→저장)는 카드 가로 공간을 버림 → 3×3 grid(`auto Npx auto`)로 4모서리 노드 + 사이 화살표. 흐름 **2(TL)→1(TR)→4(BR)→3(BL)** 시계방향. 커넥터 라벨은 `position:absolute` + `background:var(--bg-surface)`(카드 bg와 동일)로 선을 마스킹 → 다이어그램과 안 겹침. 화살촉은 기존 CSS 삼각형(border 기법) 재사용.
+- **비교 카드 라벨 위계 대칭**: A/B 비교 카드에서 한쪽 eyebrow 옆에만 보조 라벨(예 우측 "오늘의 목적지")이 있으면 비대칭 → 반대편도 eyebrow 옆에 같은 스타일 보조 라벨(좌측 "지난 편에서 끝낸 기본기")을 둬 위계 통일. 하단 떠 있던 라벨을 eyebrow 옆으로 끌어올리면 빈 하단도 정리됨.
 
 ---
 
