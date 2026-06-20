@@ -875,4 +875,26 @@ After:
 
 ---
 
+## 2026-06-20 (도입부 재배열 + 카드 디테일 + 메타포 정합)
+
+- **슬라이드 한 칸 이동(reorder)의 footer 재번호 = 회전(rotation)**: 목차를 2→7로 옮기면 {02..07}이 한 칸씩 도는 순열이라 **단일 치환마다 충돌**. 해결: 한 슬라이드를 **temp 번호(`00 / 80` — cover는 footer 없어 안전)** 로 빼두고 → 나머지를 빈 자리로 순차 이동 → 마지막에 temp를 최종값으로. 그 후 **DOM 물리 이동**(delete + insert)으로 화면 순서와 footer 순서 일치. (footer만 바꾸고 블록을 안 옮기면 deck-stage가 DOM 순서로 보여줘 번호가 뒤죽박죽.)
+- **재배열에 강한 훅은 label 기반**: Agent Intro Quote가 idx 3→2로 밀렸지만 오디오·낭송 훅이 `dataset.label` 판정이라 무수정 동작. 인덱스 기반이었으면 다 깨졌음. (앞서 적은 교훈 재확인.)
+- **혼합 사이즈 타이틀**: 표지 "The Hitchhiker's Guide to"만 96px(=160의 60%) `<span>`, 다음 줄 "the AI Agents." 160px. 작은 행이 부제처럼 큰 행을 받쳐 위계가 살고 줄바꿈도 자연스러워짐.
+- **메타포는 헤드라인↔본문 매핑이 일치해야**: "회로판은 내가 깐다 / 전기는 LLM이 흘린다" 인데 본문 박스가 "전기=Claude"만 설명하고 회로판은 안 풀어주면 붕 뜸. 박스에서 **회로판=구조(파일·규칙·권한), 전기=Claude(지능)** 둘 다 명시 → 메타포 완결. Claude(대화) vs Claude Code(행동) 구분은 유지.
+- **장점/단점은 라벨+구분선으로 분리**: 인라인 +/− 보다 "장점"/"단점" 헤더 + 가로 divider가 더 명확. 채움 답·예시 서비스(Power Automate·n8n·Claude Code)는 본문 옆/아래 muted gray 한 줄로 — 한·영 혼용이라 mono 금지(Samsung SS body).
+
+---
+
+## 2026-06-20 (비교카드 통일 글로우 + 표지/낭송/음악/영상)
+
+- **비교 카드 통일 — 클래스 + `!important`로 인라인 일괄 제압**: `.cmp-card{bg·border·shadow !important}` + `.cmp-card,.cmp-card *{color:#fff!important}`(인라인 회색 전부 흰색) + `.cmp-card.cmp-hi{밝은 테두리+다층 box-shadow 글로우}`. `.ba-col` 기반 비교 슬라이드는 **CSS 셀렉터에 `.ba-col` 합류**(`.cmp-card,.ba-col` / `.ba-col.after,.ba-col.cmp-hi`)시켜 9장+α 전부 HTML 최소수정으로 통일. `.after`가 강조면 자동 글로우, 인라인 border로 강조하던 카드만 `cmp-hi` 클래스 추가. 위쪽 4px 띠(`<div>`)는 삭제 — 글로우가 대체.
+- **글로우 = box-shadow 다층**: `0 0 0 1px(테두리 hug) , 0 0 26px(중간 halo) , 0 0 60px(외곽 번짐)` 흰색 저알파. `overflow:hidden`이 박스섀도를 자르지 않음(콘텐츠만 클립). "은은하게 테두리 따라 빛남" 달성.
+- **카드 높이 균일(단점 정렬)**: 장점 줄 수가 카드마다 다르면 구분선·단점이 어긋남 → **장점 블록에 동일 `min-height`** 주면 2줄 카드에 하단 여백이 생겨 divider+단점이 같은 y로 정렬. (양쪽 갯수 통일보다 콘텐츠 보존.)
+- **`<video>` 구간 크롭(00:10~01:00)+배속+클릭재생**: HTML5 video는 네이티브 구간크롭 없음 → JS로 `currentTime=10` 시작 + `timeupdate`에서 `>=60`이면 pause+리셋, `playbackRate=1.25`, 클릭 토글. **핵심 함정: 시킹은 서버 HTTP Range(206) 필수.** `python -m http.server`는 Range 미지원(200, `seekable.length===0`)이라 로컬선 시크 실패 → **GitHub Pages는 Range 지원**이라 실제 배포선 동작. 코드엔 `seekable`로 시크가능 판정 + `seeked` 미발생 700ms 폴백 → range 없는 서버에선 그냥 재생(행 안 걸림). 세로영상(480×854)은 `height:680;width:auto`로 레터박스 제거. 클릭아이콘은 이모지 금지라 인라인 SVG(원+삼각).
+- **표지 혼합 크기 3줄**: 윗 2줄 116px(96×1.2, 표지 히어로 예외), 막줄 160px. **줄바꿈 orphan 해결**은 보통 `max-width` 넓혀 한 줄에 들어가게(분할 divider 서브의 "데 있습니다" 고아 → max-width 1640으로 2줄화).
+- **낭송 마지막 구절 한 번에 강조**: 두 `<span class="recite-seg">`을 **하나의 span에 `<br>` 넣어** 병합 → inline-block scale이 두 줄을 한 덩어리로 강조. 세그먼트 수는 JS가 `reciteSeg.length` 동적이라 무수정.
+- **오디오 페이드**: `setInterval`(80ms)로 `currentTime` 감시, 18s부터 `volume=(20-t)/2`, 20s에 0+pause. stop/재생 때 `volume=1` 리셋 + interval clear.
+
+---
+
 ## (다음 작업 추가 예정)
