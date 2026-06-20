@@ -2252,11 +2252,11 @@
     let cueTimer = null;
     const muteBtn = document.getElementById('cue-mute');
 
-    // 14p Hammer Analogy 영상 — 클릭 재생, 00:10~01:00 크롭, 1.25배속
+    // 14p Hammer Analogy 영상 — 클릭 재생, 00:10~01:04 크롭, 1.25배속
     const hammerVid = document.getElementById('hammer-vid');
     const hammerPlay = document.getElementById('hammer-play');
     if (hammerVid) {
-      const VS = 10, VE = 60;
+      const VS = 10, VE = 64;
       hammerVid.playbackRate = 1.25;
       const seekThen = (cb) => {                                  // 10초로 시크 완료 후 콜백. 서버 range 미지원(시크 불가) 시엔 그냥 재생
         const canSeek = hammerVid.seekable && hammerVid.seekable.length && hammerVid.seekable.end(hammerVid.seekable.length - 1) >= VS;
