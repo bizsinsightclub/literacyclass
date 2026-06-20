@@ -894,6 +894,9 @@ After:
 - **표지 혼합 크기 3줄**: 윗 2줄 116px(96×1.2, 표지 히어로 예외), 막줄 160px. **줄바꿈 orphan 해결**은 보통 `max-width` 넓혀 한 줄에 들어가게(분할 divider 서브의 "데 있습니다" 고아 → max-width 1640으로 2줄화).
 - **낭송 마지막 구절 한 번에 강조**: 두 `<span class="recite-seg">`을 **하나의 span에 `<br>` 넣어** 병합 → inline-block scale이 두 줄을 한 덩어리로 강조. 세그먼트 수는 JS가 `reciteSeg.length` 동적이라 무수정.
 - **오디오 페이드**: `setInterval`(80ms)로 `currentTime` 감시, 18s부터 `volume=(20-t)/2`, 20s에 0+pause. stop/재생 때 `volume=1` 리셋 + interval clear.
+- **푸터 여백 일괄 확보(~35px)**: 거의 모든 콘텐츠 슬라이드가 `.split/.ba/.recipe/.steps`(전부 `flex:1`) 때문에 본문 하단이 footer.top 대비 gap 8px까지 바짝 붙음. **단일 레버** = `section.slide` 하단 패딩 80→105 (footer는 `position:absolute;bottom:40` 불변) → flex:1 블록이 25px 덜 늘어 자동 상승, 여백 있는 슬라이드 일괄 해결. **함정**: 여백 없이 꽉 찬 dense 슬라이드(번호 그리드 등)는 10~14px clipping → `section.slide.tight-bottom{padding-bottom:80px}` 예외 클래스로 원복(이들은 "여백 많은" 케이스 아님). Playwright로 `scrollHeight-clientHeight` 전수 스윕해 예외 대상 식별.
+- **내부 여백을 예시박스로 채우기**: flex:1+align-items:stretch로 늘어난 카드의 빈 하단을, 설명 다음 예시 블록에 `margin-top:auto`를 줘 바닥에 정렬 → 상단 설명/하단 예시 2단 분포로 여백 해소(20p 역할 예시). 후략은 표준 `…`(U+2026, 이모지 아님; 덱에 기존 사용).
+- **박스 높이 통일은 스코프 클래스+min-height**: 3카드 하단 예시박스 높이 제각각 → `.recipe`에 `three-kinds` 클래스 + `.recipe.three-kinds .ex{min-height:160px}` (19p `four-ing` 패턴 재사용). min-height는 **가장 긴 박스의 실측 자연높이 이상**으로(3줄=156 → 160). 공유 CSS(.ex) 직접 수정 금지 — 다른 슬라이드 오염.
 
 ---
 

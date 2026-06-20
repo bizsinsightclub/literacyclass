@@ -55,7 +55,7 @@
     background:var(--bg-main);
     color:var(--text-primary);
     font-family:var(--font-body);
-    padding:100px 100px 80px 100px;
+    padding:100px 100px 105px 100px;
     display:flex;
     flex-direction:column;
     position:relative;
@@ -318,6 +318,8 @@
   /* 19p 네 재료 — 카드 자연 높이 + 예시 박스 균일(시작·높이 통일) */
   .recipe.four-ing{flex:none;margin-top:auto;margin-bottom:auto;}
   .recipe.four-ing .ex{min-height:240px;margin-top:0;}
+  .recipe.three-kinds .ex{min-height:160px;}
+  section.slide.tight-bottom{padding-bottom:80px;}
 
   /* 3-step workflow */
   .steps{display:flex;gap:40px;margin-top:72px;flex:1;align-items:stretch;}
@@ -561,7 +563,7 @@
   </section>
 
   <!-- AGENDA — 목차 (1편 직전 브릿지) -->
-  <section class="slide" data-label="Agenda">
+  <section class="slide tight-bottom" data-label="Agenda">
     <div class="eyebrow">오늘의 흐름</div>
     <div class="title" style="margin-top:20px;">네 편으로 나눠 다룹니다.</div>
     <div style="flex:1;display:flex;flex-direction:column;justify-content:center;margin-top:8px;">
@@ -821,10 +823,18 @@
       <div class="ba-col" style="background:var(--bg-surface);">
         <div class="tag" style="color:var(--text-secondary);">초등학교 선생님</div>
         <div class="body" style="color:var(--text-secondary);font-size:30px;">같은 주제를 <b style="color:#fff;">쉽고 친근하게</b>, 비유와 예시 중심으로 풀어냅니다.</div>
+        <div style="margin-top:auto;padding-top:28px;">
+          <div style="font-size:24px;color:var(--text-tertiary);">“AI가 뭐야?” 라고 물으면</div>
+          <div style="background:rgba(0,0,0,0.32);border-radius:14px;padding:20px 24px;margin-top:12px;font-size:24px;line-height:1.6;color:var(--text-secondary);">“AI는 아주 똑똑한 친구예요. 물어보면 같이 생각해 주고, 어려운 건 쉽게 풀어서…”</div>
+        </div>
       </div>
       <div class="ba-col" style="background:var(--bg-surface);">
         <div class="tag" style="color:var(--text-secondary);">전략 컨설턴트</div>
         <div class="body" style="color:var(--text-secondary);font-size:30px;">같은 주제를 <b style="color:#fff;">구조적이고 데이터 중심</b>으로, 논리 프레임을 얹어 정리합니다.</div>
+        <div style="margin-top:auto;padding-top:28px;">
+          <div style="font-size:24px;color:var(--text-tertiary);">“AI가 뭐야?” 라고 물으면</div>
+          <div style="background:rgba(0,0,0,0.32);border-radius:14px;padding:20px 24px;margin-top:12px;font-size:24px;line-height:1.6;color:var(--text-secondary);">“AI는 의사결정 비용을 낮추는 레버리지입니다. 도입 효과는 ROI·생산성·리스크 세 축에서…”</div>
+        </div>
       </div>
     </div>
     <div class="caption" style="margin-top:40px;">똑같은 질문, 완전히 다른 결과 — 한 번 직접 실험해보세요.</div>
@@ -858,7 +868,7 @@
   </section>
 
   <!-- 15 — 세 습관 -->
-  <section class="slide" data-label="Three Bad Habits">
+  <section class="slide tight-bottom" data-label="Three Bad Habits">
     <div class="eyebrow amber">Three Habits to Unlearn</div>
     <div class="title" style="margin-top:24px;">프롬프트 망치는<br>세 가지 습관.</div>
     <div class="habits">
@@ -893,12 +903,10 @@
     <div class="title" style="margin-top:24px;">나만의 프롬프트 템플릿.</div>
     <div class="caption" style="margin-top:16px;max-width:1400px;">반복 업무 하나를 떠올리고, 아래 네 칸을 채워 저장해두세요. 같은 작업마다 재사용됩니다.</div>
     <div style="background:var(--bg-surface);border-radius:20px;padding:52px 72px;margin-top:36px;display:flex;flex-direction:column;gap:22px;font-size:28px;line-height:1.4;color:var(--text-secondary);">
-      <div style="font-size:80px;line-height:0.5;height:38px;color:var(--text-tertiary);">"</div>
       <div>너는 <span style="color:var(--accent-purple);font-weight:600;">[역할]</span>이야.</div>
       <div><span style="color:var(--accent-purple);font-weight:600;">[상황 · 맥락]</span>에서 <span style="color:var(--accent-purple);font-weight:600;">[결과물]</span>이 필요해.</div>
       <div><span style="color:var(--accent-purple);font-weight:600;">[형식]</span>으로 써줘.</div>
       <div><span style="color:var(--accent-purple);font-weight:600;">[하지 말아야 할 것]</span>은 빼줘.</div>
-      <div style="text-align:right;height:38px;line-height:0.5;font-size:80px;color:var(--text-tertiary);"><span style="display:inline-block;transform:rotate(180deg);">"</span></div>
     </div>
     <div class="footer"><div class="page">24 / 80</div></div>
   </section>
@@ -1014,12 +1022,12 @@
     <div style="background:var(--bg-surface);border-radius:20px;padding:52px 64px;margin-top:40px;flex:1;display:flex;flex-direction:column;justify-content:center;gap:32px;">
       <div style="display:flex;gap:32px;align-items:flex-start;">
         <div style="font-family:var(--font-mono);font-size:24px;font-weight:600;color:var(--accent-cyan);letter-spacing:0.12em;min-width:140px;padding-top:6px;">REQUEST</div>
-        <div style="font-size:36px;line-height:1.45;font-weight:500;">“이번에 P&amp;G Dove 신제품 관련<br>카피 한 줄 제안해줘.”</div>
+        <div style="font-size:32px;line-height:1.5;font-weight:500;">“이번에 P&amp;G Dove 신제품 관련<br>카피 한 줄 제안해줘.”</div>
       </div>
       <div style="height:1px;background:rgba(255,255,255,0.08);"></div>
       <div style="display:flex;gap:32px;align-items:flex-start;">
         <div style="font-family:var(--font-mono);font-size:24px;font-weight:600;color:var(--text-secondary);letter-spacing:0.12em;min-width:140px;padding-top:6px;">RESPONSE</div>
-        <div style="font-size:32px;line-height:1.5;color:var(--text-primary);">“입안 가득 사르르 녹는 부드러운 목넘김.<br>오늘도 달콤한 한 조각의 행복!”</div>
+        <div style="font-size:32px;line-height:1.5;font-weight:500;color:var(--text-primary);">“입안 가득 사르르 녹는 부드러운 목넘김.<br>오늘도 달콤한 한 조각의 행복!”</div>
       </div>
       <div style="height:1px;background:rgba(255,255,255,0.08);"></div>
       <div style="display:flex;gap:32px;align-items:flex-start;">
@@ -1075,7 +1083,7 @@
       </div>
       <div class="caption" style="max-width:560px;text-align:right;">모든 걸 한 번에 줄 필요는 없지만,<br>이 셋 중 뭐가 빠졌는지는 알고 있어야 합니다.</div>
     </div>
-    <div class="recipe" style="grid-template-columns:repeat(3, 1fr);">
+    <div class="recipe three-kinds" style="grid-template-columns:repeat(3, 1fr);">
       <div class="card">
         <div class="cnum" style="color:var(--accent-cyan);">01 / Company</div>
         <div class="ctitle">회사 · 팀</div>
@@ -1149,11 +1157,11 @@
       <div style="background:var(--bg-surface);border:1px solid rgba(255,255,255,0.3);border-radius:20px;padding:36px 48px;display:flex;flex-direction:column;justify-content:flex-start;">
         <div class="eyebrow" style="color:var(--accent-purple);margin-bottom:20px;">내 회사로 채워보면</div>
         <div style="display:flex;flex-direction:column;gap:16px;font-size:24px;line-height:1.6;color:var(--text-primary);">
-          <div>우리 팀은 <b style="color:var(--accent-purple);text-decoration:underline;text-underline-offset:5px;">브랜드의 시장·소비자를 깊게 조사</b>해 인사이트를 찾고, 그에 맞는 전략·크리에이티브를 제안하는 AP 부서야.</div>
-          <div>주요 고객은 <b style="color:var(--accent-purple);text-decoration:underline;text-underline-offset:5px;">신제품·캠페인을 앞둔 광고주</b>. 신경 쓰는 건 매출보다 '왜 우리 브랜드여야 하나'의 설득력이야.</div>
-          <div>우리 팀 글쓰기 원칙은 <b style="color:var(--accent-purple);text-decoration:underline;text-underline-offset:5px;">소비자 인사이트 한 줄 먼저, 그다음 전략</b>. 형용사보다 근거.</div>
-          <div>절대 쓰면 안 되는 표현은 <b style="color:var(--accent-purple);text-decoration:underline;text-underline-offset:5px;">'요즘 트렌드' · '혁신적인' · '차별화'</b>. 근거 없이 공허한 단어 셋.</div>
-          <div>지금 집중하는 과제는 <b style="color:var(--accent-purple);text-decoration:underline;text-underline-offset:5px;">다음 달 경쟁 PT</b>. 이기면 1년 캠페인 수주, 지면 끝.</div>
+          <div>우리 팀은 <b style="color:var(--accent-purple);text-decoration:underline;text-underline-offset:5px;">브랜드의 시장·소비자를 깊게 조사</b>해 인사이트를 찾고,<br>그에 맞는 전략·크리에이티브를 제안하는 AP 부서야.</div>
+          <div>주요 고객은 <b style="color:var(--accent-purple);text-decoration:underline;text-underline-offset:5px;">신제품·캠페인을 앞둔 광고주</b>. 신경 쓰는 건 매출보다<br>'왜 우리 브랜드여야 하나'의 설득력이야.</div>
+          <div>우리 팀 글쓰기 원칙은 <b style="color:var(--accent-purple);text-decoration:underline;text-underline-offset:5px;">소비자 인사이트 한 줄 먼저,<br>그 다음 전략</b>. 형용사보다 근거.</div>
+          <div>절대 쓰면 안 되는 표현은 <b style="color:var(--accent-purple);text-decoration:underline;text-underline-offset:5px;">'트렌디한' · '혁신적인' · '차별화'</b>.<br>근거 없이 공허한 단어 셋.</div>
+          <div>지금 집중하는 과제는 <b style="color:var(--accent-purple);text-decoration:underline;text-underline-offset:5px;">다음 달 경쟁 PT</b>. 상대는 기존 대행사인 대홍.</div>
         </div>
       </div>
     </div>
@@ -1170,7 +1178,7 @@
   </section>
 
   <!-- 33 — 3 습관 -->
-  <section class="slide" data-label="Three Context Habits">
+  <section class="slide tight-bottom" data-label="Three Context Habits">
     <div class="eyebrow amber">Three Habits to Avoid</div>
     <div class="title" style="margin-top:24px;">컨텍스트 망치는<br>세 가지 습관.</div>
     <div class="habits">
@@ -1463,7 +1471,7 @@
   </section>
 
   <!-- 50 — 망치는 습관 3가지 -->
-  <section class="slide" data-label="Three Agentic Bad Habits">
+  <section class="slide tight-bottom" data-label="Three Agentic Bad Habits">
     <div class="eyebrow amber">Three Habits to Unlearn</div>
     <div class="title" style="margin-top:24px;">에이전틱 시스템<br>망치는 세 가지 습관.</div>
     <div class="habits">
