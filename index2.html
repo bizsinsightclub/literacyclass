@@ -1,0 +1,2285 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<title>The Hitchhiker's Guide to the AI Agents — 제일기획 AI 리터러시</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500&display=swap">
+<style>
+  /* ===== Samsung SS (제일기획 표준 서체) 로컬 웹폰트 — design/fonts/woff2 ===== */
+  @font-face{font-family:"Samsung SS Head";font-weight:300;font-style:normal;font-display:swap;src:url("design/fonts/woff2/SamsungSSHead-Light.woff2") format("woff2");}
+  @font-face{font-family:"Samsung SS Head";font-weight:400;font-style:normal;font-display:swap;src:url("design/fonts/woff2/SamsungSSHead-Regular.woff2") format("woff2");}
+  @font-face{font-family:"Samsung SS Head";font-weight:500;font-style:normal;font-display:swap;src:url("design/fonts/woff2/SamsungSSHead-Medium.woff2") format("woff2");}
+  @font-face{font-family:"Samsung SS Head";font-weight:700;font-style:normal;font-display:swap;src:url("design/fonts/woff2/SamsungSSHead-Bold.woff2") format("woff2");}
+  @font-face{font-family:"Samsung SS Body";font-weight:300;font-style:normal;font-display:swap;src:url("design/fonts/woff2/SamsungSSBody-Light.woff2") format("woff2");}
+  @font-face{font-family:"Samsung SS Body";font-weight:400;font-style:normal;font-display:swap;src:url("design/fonts/woff2/SamsungSSBody-Regular.woff2") format("woff2");}
+  @font-face{font-family:"Samsung SS Body";font-weight:700;font-style:normal;font-display:swap;src:url("design/fonts/woff2/SamsungSSBody-Bold.woff2") format("woff2");}
+  @font-face{font-family:"Samsung SS Head KR";font-weight:300;font-style:normal;font-display:swap;src:url("design/fonts/woff2/SamsungSSHeadKR-Light.woff2") format("woff2");}
+  @font-face{font-family:"Samsung SS Head KR";font-weight:400;font-style:normal;font-display:swap;src:url("design/fonts/woff2/SamsungSSHeadKR-Regular.woff2") format("woff2");}
+  @font-face{font-family:"Samsung SS Head KR";font-weight:500;font-style:normal;font-display:swap;src:url("design/fonts/woff2/SamsungSSHeadKR-Medium.woff2") format("woff2");}
+  @font-face{font-family:"Samsung SS Head KR";font-weight:700;font-style:normal;font-display:swap;src:url("design/fonts/woff2/SamsungSSHeadKR-Bold.woff2") format("woff2");}
+  @font-face{font-family:"Samsung SS Body KR";font-weight:300;font-style:normal;font-display:swap;src:url("design/fonts/woff2/SamsungSSBodyKR-Light.woff2") format("woff2");}
+  @font-face{font-family:"Samsung SS Body KR";font-weight:400;font-style:normal;font-display:swap;src:url("design/fonts/woff2/SamsungSSBodyKR-Regular.woff2") format("woff2");}
+  @font-face{font-family:"Samsung SS Body KR";font-weight:700;font-style:normal;font-display:swap;src:url("design/fonts/woff2/SamsungSSBodyKR-Bold.woff2") format("woff2");}
+  /* 장식용 — 도입부 어명 결의 한 줄에만 사용 (design/fonts/ttf) */
+  @font-face{font-family:"Griun PolSensibility";font-weight:400;font-style:normal;font-display:swap;src:url("design/fonts/ttf/Griun_PolSensibility-Rg.ttf") format("truetype");}
+  :root{
+    --bg-main:#0E0E0E;
+    --bg-surface:#1C1C1E;
+    --bg-elevated:#2A2A2D;
+    --text-primary:#FFFFFF;
+    --text-secondary:#8E8E93;
+    --text-tertiary:#5A5A60;
+    /* 완전 무채색 — 형광 accent 제거. 강조는 흰색(굵기·크기·여백)으로. 별칭 토큰은 전부 흰색 계열에 수렴 */
+    --accent:#FFFFFF;
+    --accent-purple:#FFFFFF;
+    --accent-cyan:#FFFFFF;
+    --accent-amber:#FFFFFF;
+    --accent-10:rgba(255,255,255,0.06);
+    --accent-20:rgba(255,255,255,0.12);
+    --accent-purple-10:rgba(255,255,255,0.06);
+    --accent-purple-20:rgba(255,255,255,0.12);
+    --accent-cyan-10:rgba(255,255,255,0.06);
+    --accent-amber-10:rgba(255,255,255,0.08);
+    --font-head:"Samsung SS Head","Samsung SS Head KR","Malgun Gothic",sans-serif;
+    --font-body:"Samsung SS Body","Samsung SS Body KR","Malgun Gothic",sans-serif;
+    --font-sans:var(--font-body);
+    --font-mono:"JetBrains Mono","Samsung SS Body KR","Samsung SS Body","Malgun Gothic",ui-monospace,monospace;
+  }
+  html,body{margin:0;padding:0;background:#000;color:#fff;font-family:var(--font-body);}
+  deck-stage{font-family:var(--font-body);}
+  /* 글로우/광선 효과 일괄 제거 — 클린 에디토리얼 */
+  .glow{display:none!important;}
+  section.slide{
+    background:var(--bg-main);
+    color:var(--text-primary);
+    font-family:var(--font-body);
+    padding:100px 100px 80px 100px;
+    display:flex;
+    flex-direction:column;
+    position:relative;
+    overflow:hidden;
+    letter-spacing:-0.01em;
+    -webkit-font-smoothing:antialiased;
+    text-rendering:geometricPrecision;
+  }
+  section.slide *{box-sizing:border-box;word-break:keep-all;text-wrap:pretty;}
+  /* 제일기획 로고 — 전 슬라이드 우하단, 원본(125x39)의 50% ≈ 63x20, 좌측 페이지번호와 비충돌 */
+  section.slide::after{
+    content:"";position:absolute;right:60px;bottom:40px;
+    width:63px;height:20px;z-index:5;pointer-events:none;opacity:0.7;
+    background:url("assets/cheil-logo.svg") no-repeat center/contain;
+  }
+
+  /* Footer */
+  .footer{
+    position:absolute;
+    left:100px; right:100px; bottom:40px;
+    display:flex; justify-content:space-between; align-items:center;
+    color:var(--text-tertiary);
+    font-size:24px;
+    letter-spacing:0.02em;
+    font-weight:500;
+  }
+  .footer .brand{color:var(--text-secondary);}
+  .footer .brand .dot{display:inline-block;width:8px;height:8px;border-radius:50%;background:var(--accent-purple);margin-right:10px;vertical-align:middle;}
+  .footer .page{font-variant-numeric:tabular-nums;}
+
+  /* Typography helpers */
+  /* Type scale — 헤드 계열은 Samsung SS Head, 본문은 Samsung SS Body. 웨이트는 보유분(300/400/500/700)로 정리 */
+  .display{font-family:var(--font-head);font-size:160px;font-weight:700;line-height:1;letter-spacing:-0.045em;}
+  .title{font-family:var(--font-head);font-size:80px;font-weight:700;line-height:1.15;letter-spacing:-0.028em;}
+  .title-lg{font-family:var(--font-head);font-size:96px;font-weight:700;line-height:1.1;letter-spacing:-0.032em;}
+  .section-h{font-family:var(--font-head);font-size:56px;font-weight:700;line-height:1.25;letter-spacing:-0.018em;}
+  .subsection{font-family:var(--font-head);font-size:40px;font-weight:500;line-height:1.35;letter-spacing:-0.012em;}
+  .body{font-family:var(--font-body);font-size:28px;font-weight:400;line-height:1.65;color:var(--text-primary);}
+  .body-sec{font-family:var(--font-body);font-size:28px;font-weight:400;line-height:1.65;color:var(--text-secondary);}
+  .caption{font-family:var(--font-body);font-size:24px;font-weight:400;line-height:1.5;color:var(--text-secondary);letter-spacing:0;}
+  .eyebrow{font-family:var(--font-head);font-size:24px;font-weight:500;letter-spacing:0.16em;text-transform:uppercase;color:var(--text-secondary);}
+  /* 챕터별 레인보우 eyebrow 제거 — 전부 동일 회색 라벨 */
+  .eyebrow.amber,.eyebrow.purple,.eyebrow.cyan{color:var(--text-secondary);}
+  /* 대형 디스플레이/제목 스케일은 Samsung SS Head 강제 (자체 클래스라 기본 Body 상속 방지) */
+  .cover-big,.s-title .big,.s-divider .num,.s-divider .label,.s-quote .q,.s-quote .mark,
+  .s-bignum .big,.s-bignum .lede,.s-next .big,.s-analogy .q,.toc-title,
+  .card .ctitle,.step .stitle,.step .snum,.habit .htitle,.s-close .lead{font-family:var(--font-head);}
+  /* 절제: 거대 인용부호는 회색으로 차분하게 */
+  .s-quote .mark{color:var(--text-tertiary);}
+  /* 추가된 컨텍스트 디테일 강조용 밑줄 */
+  u{text-decoration:underline;text-underline-offset:5px;text-decoration-thickness:2px;text-decoration-color:rgba(255,255,255,0.55);}
+  /* 「에이전트란?」 낭송 — 회색 기본, 차례가 오면 흰색+확대, 지나면 복귀 */
+  .recite-seg{display:inline-block;transition:color 0.45s ease, transform 0.45s ease;transform-origin:center center;}
+  .recite-seg.on{color:#fff;transform:scale(1.1);}
+  /* 음악 스피커 토글 아이콘 (우측 상단) */
+  #cue-mute{transition:color 0.2s ease;}
+  #cue-mute:hover{color:var(--text-primary);}
+  #cue-mute .spk-off{display:none;}
+  #cue-mute[data-on="0"] .spk-on{display:none;}
+  #cue-mute[data-on="0"] .spk-off{display:inline;}
+  /* 브랜드마크 'AI' 박스 제거 — 상자 느낌 싫음. 텍스트 라벨만 남김 */
+  .brandmark .logo{display:none!important;}
+  /* 무채색 3계조: 작은 열거 번호/라벨은 회색으로 후퇴, 대형 디스플레이 번호·코드·em 은 흰색 유지 */
+  .toc-num,.card .cnum,.habit .hnum,.step .snum,.bullet .idx{color:var(--text-secondary)!important;}
+
+  /* Cover */
+  .s-cover{justify-content:center;padding:100px;}
+  .s-cover .glow.alt{
+    background:transparent;
+    right:auto;left:-250px;top:auto;bottom:-300px;
+    width:800px;height:800px;
+  }
+  .cover-top{display:flex;justify-content:space-between;align-items:center;position:absolute;top:100px;left:100px;right:100px;z-index:2;}
+  .cover-meta{font-size:24px;color:var(--text-secondary);letter-spacing:0.04em;font-weight:500;}
+  .cover-mid{position:relative;z-index:2;margin-top:0;}
+  .cover-mid .kicker{font-size:28px;color:var(--text-secondary);margin-bottom:32px;letter-spacing:0.02em;}
+  .cover-big{font-size:200px;font-weight:700;line-height:0.98;letter-spacing:-0.045em;}
+  .cover-big em{font-style:normal;color:var(--accent-purple);}
+  .cover-mid .sub{margin-top:48px;font-size:34px;color:var(--text-secondary);line-height:1.5;font-weight:400;max-width:1300px;}
+  .cover-toc{
+    display:flex;flex-direction:column;gap:24px;
+    position:relative;z-index:2;
+    padding-top:36px;border-top:1px solid rgba(255,255,255,0.10);
+    margin-bottom:32px;
+  }
+  .toc-row{
+    display:grid;grid-template-columns:120px 560px 1fr;gap:40px;align-items:baseline;
+  }
+  .toc-num{
+    font-family:var(--font-mono);font-size:40px;font-weight:600;
+    color:var(--accent-purple);letter-spacing:0;line-height:1;
+  }
+  .toc-title{font-size:36px;font-weight:600;letter-spacing:-0.012em;}
+  .toc-dur{font-size:26px;color:var(--text-secondary);letter-spacing:0.01em;}
+
+  /* Slide — Chapter opener */
+  .s-title{justify-content:center;}
+  .s-title .brandmark{
+    position:absolute;top:100px;left:100px;
+    display:flex;align-items:center;gap:16px;
+    font-size:24px;font-weight:600;letter-spacing:0.14em;text-transform:uppercase;color:var(--text-secondary);
+  }
+  .s-title .brandmark .logo{
+    width:52px;height:52px;border-radius:12px;
+    background:transparent;border:1px solid rgba(255,255,255,0.22);
+    display:flex;align-items:center;justify-content:center;
+    font-family:var(--font-mono);color:var(--text-primary);font-size:24px;font-weight:700;
+  }
+  .s-title .kicker{font-size:28px;color:var(--text-secondary);margin-bottom:40px;letter-spacing:0.02em;}
+  .s-title .big{font-size:176px;font-weight:700;line-height:0.98;letter-spacing:-0.04em;}
+  .s-title .big em{font-style:normal;color:var(--accent-purple);}
+  .s-title .sub{margin-top:48px;font-size:36px;color:var(--text-secondary);line-height:1.5;font-weight:400;max-width:1300px;}
+  .s-title .glow{
+    position:absolute;right:-200px;top:-200px;
+    width:900px;height:900px;border-radius:50%;
+    background:transparent;
+    filter:blur(20px);pointer-events:none;
+  }
+  /* 챕터 표지 = 흰 배경(반전). 섹션 구분 페이지보다 위계를 위로 끌어올림 */
+  section.s-title{background:#FFFFFF;color:#0E0E0E;}
+  .s-title .kicker{color:#6E6E73;}
+  .s-title .big{color:#0E0E0E;}
+  .s-title .big em{color:#0E0E0E;}
+  .s-title .sub{color:#3A3A3C;}
+  .s-title .brandmark{color:#6E6E73;}
+  .s-title .footer,.s-title .footer .page{color:#9A9A9E;}
+  .s-title::after{filter:invert(1);}
+
+  /* Section divider */
+  .s-divider{justify-content:center;}
+  .s-divider .num{
+    font-size:320px;font-weight:700;line-height:1;letter-spacing:-0.05em;
+    color:var(--text-primary);
+    display:flex;align-items:baseline;gap:40px;
+  }
+  .s-divider .num .suffix{font-size:80px;color:var(--text-tertiary);font-weight:500;letter-spacing:0;}
+  .s-divider .label{margin-top:40px;font-size:64px;font-weight:600;letter-spacing:-0.015em;line-height:1.2;max-width:1400px;}
+  .s-divider .rule{width:120px;height:6px;background:var(--accent-purple);margin-top:56px;border-radius:3px;}
+  .s-divider.amber .rule{background:var(--accent-amber);}
+  .s-divider.cyan .rule{background:var(--accent-cyan);}
+
+  /* Two-column split */
+  .split{display:grid;grid-template-columns:var(--cols, 1fr 1fr);gap:var(--gap,80px);flex:1;align-items:start;}
+  .split.center{align-items:center;}
+  .col{display:flex;flex-direction:column;}
+
+  /* Quote / callout slide */
+  .s-quote{justify-content:center;}
+  .s-quote .mark{
+    font-family:var(--font-sans);font-weight:700;
+    font-size:280px;line-height:0.5;color:var(--accent-purple);margin-bottom:0;
+  }
+  .s-quote .q{font-size:72px;font-weight:600;line-height:1.25;letter-spacing:-0.02em;max-width:1500px;}
+  .s-quote .cite{margin-top:56px;color:var(--text-secondary);font-size:26px;letter-spacing:0.02em;}
+
+  /* Stat / big number */
+  .s-bignum{justify-content:center;align-items:flex-start;}
+  .s-bignum .big{font-size:380px;font-weight:700;line-height:0.9;letter-spacing:-0.06em;color:var(--text-primary);}
+  .s-bignum .big .unit{font-size:120px;color:var(--text-secondary);font-weight:500;margin-left:20px;letter-spacing:-0.02em;}
+  .s-bignum .big em{font-style:normal;color:var(--accent-amber);}
+  .s-bignum .lede{margin-top:32px;font-size:44px;font-weight:500;line-height:1.35;max-width:1400px;letter-spacing:-0.01em;}
+  .s-bignum .note{margin-top:24px;font-size:26px;color:var(--text-secondary);line-height:1.55;max-width:1100px;}
+
+  /* Lists */
+  .bullets{display:flex;flex-direction:column;gap:28px;margin-top:48px;}
+  .bullet{display:flex;gap:28px;align-items:flex-start;}
+  .bullet .idx{
+    flex-shrink:0;min-width:44px;
+    color:var(--text-secondary);
+    font-family:var(--font-mono);font-weight:600;font-size:28px;
+    letter-spacing:0;padding-top:4px;
+  }
+  .bullet .txt{font-size:30px;line-height:1.5;padding-top:2px;}
+  .bullet .txt b{color:var(--text-primary);font-weight:600;}
+  .bullet .txt span{color:var(--text-secondary);font-weight:400;}
+
+  /* Flowchart (mermaid 느낌) — 노드 + 연결선 + 화살촉 + 엣지 라벨 */
+  .flow{display:flex;flex-direction:column;align-items:center;}
+  .flow .node{border:1.5px solid rgba(255,255,255,0.24);background:rgba(255,255,255,0.05);border-radius:12px;padding:16px 36px;font-size:28px;font-weight:500;text-align:center;min-width:170px;line-height:1.4;}
+  .flow .node.lead{border-color:rgba(255,255,255,0.62);background:rgba(255,255,255,0.12);font-weight:600;}
+  .flow .edge{position:relative;width:2px;height:62px;background:rgba(255,255,255,0.32);}
+  .flow .edge::after{content:"";position:absolute;bottom:0;left:50%;transform:translateX(-50%);width:0;height:0;border-left:7px solid transparent;border-right:7px solid transparent;border-top:9px solid rgba(255,255,255,0.5);}
+  .flow .edge .lbl{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);white-space:nowrap;font-size:24px;color:var(--text-secondary);background:var(--bg-surface);padding:2px 12px;}
+  .flow .row{display:flex;align-items:center;}
+  .flow .hedge{position:relative;width:38px;height:2px;background:rgba(255,255,255,0.32);}
+  .flow .hedge::after{content:"";position:absolute;right:0;top:50%;transform:translateY(-50%);width:0;height:0;border-top:6px solid transparent;border-bottom:6px solid transparent;border-left:8px solid rgba(255,255,255,0.5);}
+
+  /* Topic chips (cloud) */
+  .chips{display:flex;flex-wrap:wrap;gap:16px;margin-top:56px;max-width:1600px;}
+  .chip{
+    padding:16px 28px;border-radius:999px;
+    background:var(--bg-surface);
+    color:var(--text-primary);
+    font-size:28px;font-weight:500;letter-spacing:-0.005em;
+    border:1px solid rgba(255,255,255,0.06);
+  }
+  .chip.dim{color:var(--text-secondary);background:transparent;border:1px solid rgba(255,255,255,0.10);}
+  .chip.accent{background:var(--accent-purple-20);color:#fff;border:1px solid var(--accent-purple);}
+
+  /* Before / After */
+  .ba{display:grid;grid-template-columns:1fr 1fr;gap:48px;flex:1;margin-top:24px;}
+  .ba-col{
+    background:var(--bg-surface);
+    border-radius:20px;
+    padding:56px 56px;
+    display:flex;flex-direction:column;
+    min-height:0;
+  }
+  .ba-col.after{
+    background:var(--bg-surface);
+    border:1px solid rgba(255,255,255,0.25);
+  }
+  .ba-col .tag{
+    font-size:24px;font-weight:600;letter-spacing:0.18em;text-transform:uppercase;
+    color:var(--text-secondary);
+    margin-bottom:28px;
+  }
+  .ba-col.after .tag{color:var(--accent-purple);}
+  .ba-col .lede{margin-top:28px;font-size:26px;color:var(--text-secondary);line-height:1.55;}
+
+  /* Recipe card (ingredients) */
+  .recipe{display:grid;grid-template-columns:repeat(4, 1fr);gap:28px;margin-top:56px;flex:1;}
+  .card{
+    background:var(--bg-surface);
+    border-radius:18px;
+    padding:40px 36px 36px;
+    display:flex;flex-direction:column;
+    position:relative;
+    overflow:hidden;
+  }
+  .card .cnum{
+    font-family:var(--font-body);
+    font-size:28px;font-weight:600;
+    color:var(--accent-purple);
+    margin-bottom:20px;letter-spacing:0;
+  }
+  .card .ctitle{
+    font-size:44px;font-weight:700;line-height:1.1;letter-spacing:-0.02em;
+    margin-bottom:12px;
+  }
+  .card .csub{
+    font-size:24px;color:var(--text-secondary);line-height:1.5;
+    margin-bottom:28px;font-weight:400;
+  }
+  .card .ex{
+    margin-top:auto;
+    padding:22px 24px;
+    background:rgba(0,0,0,0.32);
+    border-radius:14px;
+    font-family:var(--font-body);
+    font-size:24px;line-height:1.55;
+    color:var(--text-primary);
+  }
+  .card .ex .no{color:var(--text-tertiary);text-decoration:line-through;display:block;margin-bottom:8px;}
+  .card .ex .yes{color:var(--accent-purple);display:block;}
+
+  /* 3-step workflow */
+  .steps{display:flex;gap:40px;margin-top:72px;flex:1;align-items:stretch;}
+  .step{flex:1;display:flex;flex-direction:column;}
+  .step .snum{font-size:56px;font-weight:600;color:var(--text-secondary);letter-spacing:-0.01em;}
+  .step .sdiv{height:2px;background:var(--bg-elevated);margin:24px 0 32px;}
+  .step .stitle{font-size:44px;font-weight:600;line-height:1.2;letter-spacing:-0.015em;margin-bottom:20px;}
+  .step .sdesc{font-size:24px;line-height:1.6;color:var(--text-secondary);}
+
+  /* Habit list (don'ts) */
+  .habits{display:flex;flex-direction:column;gap:32px;margin-top:64px;flex:1;}
+  .habit{
+    display:grid;
+    grid-template-columns:100px 1fr;
+    gap:40px;
+    padding:36px 0;
+    border-top:1px solid rgba(255,255,255,0.08);
+    align-items:start;
+  }
+  .habit:last-child{border-bottom:1px solid rgba(255,255,255,0.08);}
+  .habit .hnum{
+    font-family:var(--font-mono);
+    font-size:44px;font-weight:600;
+    color:var(--accent-amber);
+    line-height:1;padding-top:6px;
+  }
+  .habit .hbody{}
+  .habit .htitle{font-size:40px;font-weight:600;line-height:1.25;margin-bottom:12px;letter-spacing:-0.012em;}
+  .habit .hdesc{font-size:24px;line-height:1.55;color:var(--text-secondary);}
+
+
+  /* Final / next */
+  .s-next{justify-content:flex-end;}
+  .s-next .arrow{
+    font-family:var(--font-mono);font-size:28px;color:var(--accent-cyan);
+    margin-bottom:24px;letter-spacing:0.1em;
+  }
+  .s-next .big{font-size:120px;font-weight:700;line-height:1.05;letter-spacing:-0.035em;}
+  .s-next .big em{font-style:normal;color:var(--accent-cyan);}
+  .s-next .ep{margin-top:44px;font-size:28px;color:var(--text-secondary);letter-spacing:0.04em;}
+
+  /* Analogy slide */
+  .s-analogy{justify-content:center;}
+  .s-analogy .q{
+    font-size:64px;font-weight:600;line-height:1.3;letter-spacing:-0.02em;
+    max-width:1500px;
+  }
+  .s-analogy .q em{font-style:normal;color:var(--accent-amber);}
+  .s-analogy .ans{
+    margin-top:56px;
+    padding-top:48px;
+    border-top:2px solid var(--bg-elevated);
+    font-size:40px;color:var(--text-secondary);line-height:1.5;max-width:1500px;
+  }
+
+  /* Cover brandmark */
+  .s-cover .brandmark{
+    display:flex;align-items:center;gap:16px;
+    font-size:24px;font-weight:600;letter-spacing:0.14em;text-transform:uppercase;color:var(--text-secondary);
+  }
+  .s-cover .brandmark .logo{
+    width:56px;height:56px;border-radius:12px;
+    background:transparent;border:1px solid rgba(255,255,255,0.22);
+    display:flex;align-items:center;justify-content:center;
+    font-family:var(--font-mono);color:var(--text-primary);font-size:26px;font-weight:700;
+  }
+
+  /* Closing */
+  .s-close{justify-content:center;align-items:flex-start;}
+  .s-close .lead{font-size:68px;font-weight:600;line-height:1.3;letter-spacing:-0.02em;max-width:1600px;}
+  .s-close .lead em{font-style:normal;color:var(--accent-purple);}
+  .s-close .tag{margin-top:48px;font-size:28px;color:var(--text-secondary);letter-spacing:0.04em;}
+</style>
+</head>
+<body>
+
+<deck-stage width="1920" height="1080">
+
+  <!-- 01 — COVER: AI 직원 사용 설명서 -->
+  <section class="slide s-cover" data-label="Cover">
+    <div class="glow"></div>
+    <div class="glow alt"></div>
+    <div class="cover-mid">
+      <div class="cover-big" style="font-size:160px;">The Hitchhiker's Guide<br>to the AI Agents.</div>
+      <div class="sub" style="font-size:30px;">시키는 법부터 팀 꾸리기까지 —<br>AI를 진짜 팀원으로 만드는 네 편의 핸드북.</div>
+    </div>
+    <div class="footer">
+    </div>
+  </section>
+
+  <!-- AGENDA — 목차 (Cover 다음) -->
+  <section class="slide" data-label="Agenda">
+    <div class="eyebrow">오늘의 흐름</div>
+    <div class="title" style="margin-top:20px;">네 편으로 나눠 다룹니다.</div>
+    <div style="flex:1;display:flex;flex-direction:column;justify-content:center;margin-top:8px;">
+      <div style="display:grid;grid-template-columns:120px 1fr;gap:40px;align-items:baseline;padding:30px 0;border-top:1px solid rgba(255,255,255,0.10);">
+        <div class="toc-num">01</div>
+        <div>
+          <div class="section-h">프롬프트 엔지니어링</div>
+          <div class="body-sec" style="margin-top:6px;">지시를 정확히 — "오늘 이 업무, 이렇게 해줘"를 제대로 쓰는 법.</div>
+        </div>
+      </div>
+      <div style="display:grid;grid-template-columns:120px 1fr;gap:40px;align-items:baseline;padding:30px 0;border-top:1px solid rgba(255,255,255,0.10);">
+        <div class="toc-num">02</div>
+        <div>
+          <div class="section-h">컨텍스트 엔지니어링</div>
+          <div class="body-sec" style="margin-top:6px;">AI가 우리 회사를 알게 — 매번 새로 설명하지 않아도 되도록.</div>
+        </div>
+      </div>
+      <div style="display:grid;grid-template-columns:120px 1fr;gap:40px;align-items:baseline;padding:30px 0;border-top:1px solid rgba(255,255,255,0.10);">
+        <div class="toc-num">03</div>
+        <div>
+          <div class="section-h">에이전틱 엔지니어링</div>
+          <div class="body-sec" style="margin-top:6px;">한 명에서 팀으로 — AI들이 알아서 주고받으며 협업하게.</div>
+        </div>
+      </div>
+      <div style="display:grid;grid-template-columns:120px 1fr;gap:40px;align-items:baseline;padding:30px 0;border-top:1px solid rgba(255,255,255,0.10);border-bottom:1px solid rgba(255,255,255,0.10);">
+        <div class="toc-num">04</div>
+        <div>
+          <div class="section-h">에이전틱 실행편</div>
+          <div class="body-sec" style="margin-top:6px;">개념을 실제로 — Claude Code로 첫 AI 팀을 직접 세팅.</div>
+        </div>
+      </div>
+    </div>
+    <div class="footer"><div class="page">02 / 80</div></div>
+  </section>
+
+  <!-- ════ SECTION 00 · 도입부 (4장) ════ -->
+
+  <!-- S00-1 · 도입 「어명이오」 -->
+  <section class="slide" data-label="Intro Hook" style="justify-content:center;align-items:center;text-align:center;">
+    <div style="font-family:var(--font-head);font-weight:700;font-size:160px;line-height:1.0;letter-spacing:-0.03em;color:var(--text-primary);">어명이오!</div>
+    <div class="title" style="margin-top:44px;font-family:'Griun PolSensibility','Samsung SS Head KR',sans-serif;font-weight:400;letter-spacing:-0.005em;color:var(--text-primary);">효시일체, 1인 1에이전트 하랍신다.</div>
+    <div style="position:absolute;right:100px;bottom:104px;max-width:780px;text-align:right;">
+      <div style="font-size:24px;line-height:1.7;color:var(--text-tertiary);">
+        효시(嚆矢) — 전투의 시작을 알리던 우는 화살, 곧 한 시대의 첫 신호.<br>
+        일체(一體) — 하나로 묶어, 너 나 없이 빠짐없이 모두에게.
+      </div>
+    </div>
+    <div class="footer"><div class="page">03 / 80</div></div>
+  </section>
+
+  <!-- S00-1.5 · 에이전트란? 전우치 패러디 quote (+ aksa.mp3, 진입 3초 후 재생) -->
+  <section class="slide" data-label="Agent Intro Quote" style="justify-content:center;align-items:center;text-align:center;">
+    <button id="cue-mute" data-on="1" aria-label="음악 끄기" style="position:absolute;top:44px;right:64px;width:48px;height:48px;display:flex;align-items:center;justify-content:center;background:transparent;border:none;cursor:pointer;padding:0;color:var(--text-secondary);">
+      <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M4 9 V15 H7.5 L12 19 V5 L7.5 9 Z" fill="currentColor" stroke="none"></path>
+        <g class="spk-on"><path d="M15.5 9 a4 4 0 0 1 0 6"></path><path d="M18 6.5 a7.5 7.5 0 0 1 0 11"></path></g>
+        <g class="spk-off"><line x1="16" y1="9.5" x2="21" y2="14.5"></line><line x1="21" y1="9.5" x2="16" y2="14.5"></line></g>
+      </svg>
+    </button>
+    <div style="display:flex;flex-direction:column;align-items:center;gap:12px;color:var(--text-secondary);font-family:var(--font-head);">
+      <div style="font-weight:700;font-size:56px;line-height:1.25;letter-spacing:-0.01em;"><span class="recite-seg">에헴!</span></div>
+      <div style="font-weight:700;font-size:56px;line-height:1.25;letter-spacing:-0.01em;"><span class="recite-seg">에이전트가 무엇이냐?</span></div>
+      <div style="font-weight:400;font-size:40px;line-height:1.35;"><span class="recite-seg">복잡한 맥락을 다스리고,</span></div>
+      <div style="font-weight:400;font-size:40px;line-height:1.35;"><span class="recite-seg">열린 프롬프트에 답을 내리며,</span></div>
+      <div style="font-weight:400;font-size:40px;line-height:1.35;"><span class="recite-seg">앱을 넘나들며,</span></div>
+      <div style="font-weight:400;font-size:40px;line-height:1.35;"><span class="recite-seg">치밀한 루프를 파이프라인 태워 난제를 가르고,</span></div>
+      <div style="font-weight:400;font-size:40px;line-height:1.35;"><span class="recite-seg">여러 도구를 꽃처럼 다룰 줄 알며 —</span></div>
+      <div style="font-weight:700;font-size:56px;line-height:1.25;letter-spacing:-0.01em;"><span class="recite-seg">사람을 돕는 게,</span></div>
+      <div style="font-weight:700;font-size:56px;line-height:1.25;letter-spacing:-0.01em;"><span class="recite-seg">바로 에이전트의 일이다!</span></div>
+    </div>
+    <div class="caption" style="margin-top:32px;color:var(--text-tertiary);">영화 〈전우치〉의 '도사가 무엇이냐'를, 에이전트 버전으로.</div>
+    <div class="footer"><div class="page">04 / 80</div></div>
+  </section>
+
+  <!-- S00-2 · 정의 「스스로 정하면 에이전트」 -->
+  <section class="slide" data-label="Agent Definition">
+    <div class="eyebrow">WHAT · 한 줄 정의</div>
+    <div class="title" style="margin-top:20px;max-width:1600px;">일하는 도중에 다음 수를<br>스스로 정하면, 에이전트다.</div>
+    <div style="display:flex;flex-direction:column;gap:20px;margin-top:40px;">
+      <div style="display:grid;grid-template-columns:300px 1fr 250px;gap:32px;align-items:center;background:var(--bg-surface);border-radius:16px;padding:26px 44px;">
+        <div style="font-size:40px;font-weight:600;color:var(--text-secondary);">매크로 · 자동화</div>
+        <div style="font-size:28px;color:var(--text-tertiary);">엑셀 매크로처럼, 정해둔 순서만 정확히 밟는다.</div>
+        <div style="font-size:24px;color:var(--text-tertiary);text-align:right;">다음 수 → 사람이 미리</div>
+      </div>
+      <div style="display:grid;grid-template-columns:300px 1fr 250px;gap:32px;align-items:center;background:var(--bg-surface);border-radius:16px;padding:26px 44px;">
+        <div style="font-size:40px;font-weight:600;color:var(--text-secondary);">AI 붙은 자동화</div>
+        <div style="font-size:28px;color:var(--text-tertiary);">챗GPT에 묻는 것. 답은 똑똑한데, 그다음은 내가 정한다.</div>
+        <div style="font-size:24px;color:var(--text-tertiary);text-align:right;">다음 수 → 매번 사람</div>
+      </div>
+      <div style="display:grid;grid-template-columns:300px 1fr 250px;gap:32px;align-items:center;background:rgba(255,255,255,0.06);border:1.5px solid rgba(255,255,255,0.5);border-radius:16px;padding:30px 44px;">
+        <div style="font-size:40px;font-weight:700;color:#fff;">에이전트</div>
+        <div style="font-size:28px;color:#fff;font-weight:500;">막히면 스스로 다시 찾고, 결과를 보고 다음 단계까지 이어간다.</div>
+        <div style="font-size:24px;color:#fff;text-align:right;">다음 수 → AI가 그때그때</div>
+      </div>
+    </div>
+    <div class="caption" style="margin-top:32px;max-width:1600px;">도구는 내가 매 단계 운전합니다. 에이전트는 목적지만 주면, 알아서 운전합니다.</div>
+    <div class="footer"><div class="page">05 / 80</div></div>
+  </section>
+
+  <!-- S00-3 · 유명 에이전트 「외주/인하우스」 -->
+  <section class="slide" data-label="Famous Agents">
+    <div class="eyebrow">WHY NOW · 요즘 들리는 그 이름들</div>
+    <div class="title" style="margin-top:20px;">결국, 외주냐 인하우스냐.</div>
+    <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:32px;margin-top:40px;">
+      <div style="background:var(--bg-surface);border-radius:18px;padding:36px 36px;display:flex;flex-direction:column;">
+        <div style="font-family:var(--font-body);font-size:24px;color:var(--text-secondary);letter-spacing:0.04em;">마누스</div>
+        <div style="font-size:40px;font-weight:700;margin-top:12px;color:var(--text-secondary);">턴키 외주</div>
+        <div style="margin-top:24px;display:flex;flex-direction:column;gap:14px;font-size:24px;line-height:1.5;word-break:keep-all;">
+          <div style="color:var(--text-secondary);"><b style="color:#fff;">+ 빠르다</b> — 지시 한 번에 완성본까지.</div>
+          <div style="color:var(--text-tertiary);"><b style="color:var(--text-secondary);">− 블랙박스</b> — 과정·톤·보안이 안 보여, 우리 색을 못 입힌다.</div>
+        </div>
+        <div style="margin-top:auto;padding-top:28px;display:flex;align-items:flex-end;height:52px;"><img src="logos/manus.png" alt="Manus" style="height:34px;width:auto;object-fit:contain;opacity:0.9;"></div>
+      </div>
+      <div style="background:var(--bg-surface);border-radius:18px;padding:36px 36px;display:flex;flex-direction:column;">
+        <div style="font-family:var(--font-body);font-size:24px;color:var(--text-secondary);letter-spacing:0.04em;">헤르메스 · 오픈클로</div>
+        <div style="font-size:40px;font-weight:700;margin-top:12px;color:var(--text-secondary);">검증 안 된 신생 외주</div>
+        <div style="margin-top:24px;display:flex;flex-direction:column;gap:14px;font-size:24px;line-height:1.5;word-break:keep-all;">
+          <div style="color:var(--text-secondary);"><b style="color:#fff;">+ 실력은 있다</b> — 자동화 범위가 넓다.</div>
+          <div style="color:var(--text-tertiary);"><b style="color:var(--text-secondary);">− 통제·보안 불가</b> — 회사 자료를 통째로 넘겨야 쓴다.</div>
+        </div>
+        <div style="margin-top:auto;padding-top:28px;display:flex;align-items:flex-end;gap:24px;height:52px;"><img src="logos/hermesagent.png" alt="Hermes" style="height:46px;width:auto;object-fit:contain;filter:invert(1);"><img src="logos/openclaw-dark.png" alt="OpenClaw" style="height:46px;width:auto;object-fit:contain;"></div>
+      </div>
+      <div style="background:rgba(255,255,255,0.06);border:1.5px solid rgba(255,255,255,0.5);border-radius:18px;padding:36px 36px;display:flex;flex-direction:column;">
+        <div style="font-family:var(--font-body);font-size:24px;color:#fff;letter-spacing:0.04em;">클로드 코드</div>
+        <div style="font-size:40px;font-weight:700;margin-top:12px;color:#fff;">우리 인하우스 팀</div>
+        <div style="margin-top:24px;display:flex;flex-direction:column;gap:14px;font-size:24px;line-height:1.5;word-break:keep-all;">
+          <div style="color:#fff;"><b>+ 다 보인다 · 통제된다</b> — 과정이 보이고, 우리 가이드대로, 권한은 내가 쥔다.</div>
+          <div style="color:var(--text-secondary);"><b style="color:#fff;">− 손이 든다</b> — 직접 브리핑·세팅이 필요하다. 공짜는 아니다.</div>
+        </div>
+        <div style="margin-top:auto;padding-top:28px;display:flex;align-items:flex-end;height:52px;"><img src="logos/claude logo.png" alt="Claude Code" style="height:44px;width:auto;object-fit:contain;"></div>
+      </div>
+    </div>
+    <div class="caption" style="margin-top:28px;max-width:1600px;">셋 다 같은 에이전트입니다. 화려한 포장 뒤 공통 한계는 하나 — 과정이 안 보이고(검증 불가), 우리 일에 정확히 안 맞습니다(통제 불가).</div>
+    <div class="footer"><div class="page">06 / 80</div></div>
+  </section>
+
+  <!-- S00-4 · 왜 직접 「빌리지 말고 깔아라」 -->
+  <section class="slide" data-label="Why Build It">
+    <div class="eyebrow">HOW · 빌리지 말고, 깔아라</div>
+    <div class="title" style="margin-top:20px;max-width:1600px;">회로판은 내가 깐다.<br>전기는 LLM이 흘린다.</div>
+    <div style="margin-top:26px;background:var(--bg-surface);border-radius:14px;padding:24px 36px;font-size:28px;line-height:1.55;color:var(--text-secondary);max-width:1640px;word-break:keep-all;">전기 = 우리가 늘 쓰는 <b style="color:#fff;">Claude</b>(대화하는 AI). 거기에 파일·검색·실행의 '손발'을 달아 직접 일하게 만든 게 <b style="color:#fff;">Claude Code</b>(행동하는 에이전트).</div>
+    <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:32px;margin-top:32px;">
+      <div style="background:var(--bg-surface);border-radius:18px;padding:36px 40px;">
+        <div style="font-size:40px;font-weight:700;">훤히 보인다</div>
+        <div style="font-size:28px;color:var(--text-secondary);margin-top:14px;line-height:1.55;word-break:keep-all;">매 단계 뭘 하는지 눈앞에서 확인됩니다.</div>
+      </div>
+      <div style="background:var(--bg-surface);border-radius:18px;padding:36px 40px;">
+        <div style="font-size:40px;font-weight:700;">우리한테 맞춘다</div>
+        <div style="font-size:28px;color:var(--text-secondary);margin-top:14px;line-height:1.55;word-break:keep-all;">내 파일·업무 규칙·회사 보안에 맞게 깝니다.</div>
+      </div>
+      <div style="background:var(--bg-surface);border-radius:18px;padding:36px 40px;">
+        <div style="font-size:40px;font-weight:700;">고삐는 내가 쥔다</div>
+        <div style="font-size:28px;color:var(--text-secondary);margin-top:14px;line-height:1.55;word-break:keep-all;">권한도 금지선도 내가 정하니, 알아서 도는 불안이 없습니다.</div>
+      </div>
+    </div>
+    <div style="margin-top:40px;padding-top:32px;border-top:1px solid rgba(255,255,255,0.14);display:flex;align-items:baseline;gap:28px;">
+      <div style="font-size:56px;font-weight:700;letter-spacing:-0.02em;">그래서, 클로드 코드.</div>
+      <div style="font-size:28px;color:var(--text-secondary);">공식 도입은 아직 — 그래서 지금, 미리 익혀둡니다.</div>
+    </div>
+    <div class="footer"><div class="page">07 / 80</div></div>
+  </section>
+
+  <!-- 02 — CHAPTER 01 OPENER -->
+  <section class="slide s-title" data-label="Chapter 1 Opener">
+    <div class="glow"></div>
+    <div class="brandmark">
+      <div class="logo">AI</div>
+      <div>Chapter 01 · of 04</div>
+    </div>
+    <div>
+      <div class="big">프롬프트<br>엔지니어링.</div>
+      <div class="sub">AI에게 일을 정확히 시키는 법.<br>유행은 2년 전에 지났지만, 제대로 하는 사람은 아직 드뭅니다.</div>
+    </div>
+    <div class="footer">
+
+      <div class="page">08 / 80</div>
+    </div>
+  </section>
+
+  <!-- Ch.1 TOC -->
+  <section class="slide" data-label="Ch1 TOC">
+    <div class="eyebrow amber">이번 챕터에서</div>
+    <div class="title" style="margin-top:20px;">이렇게 흘러갑니다.</div>
+    <div style="flex:1;display:flex;flex-direction:column;justify-content:center;gap:0;margin-top:36px;">
+      <div style="display:flex;gap:40px;align-items:baseline;padding:28px 0;border-top:1px solid rgba(255,255,255,0.08);">
+        <div style="font-family:var(--font-mono);font-size:24px;color:var(--accent-amber);min-width:48px;">01</div>
+        <div style="font-size:34px;font-weight:600;min-width:380px;word-break:keep-all;">지금 너무 많다</div>
+        <div style="font-size:26px;color:var(--text-secondary);word-break:keep-all;">개념 홍수에서 진짜 세 가지만 남기기</div>
+      </div>
+      <div style="display:flex;gap:40px;align-items:baseline;padding:28px 0;border-top:1px solid rgba(255,255,255,0.08);">
+        <div style="font-family:var(--font-mono);font-size:24px;color:var(--accent-amber);min-width:48px;">02</div>
+        <div style="font-size:34px;font-weight:600;min-width:380px;word-break:keep-all;">대충 쓰면 생기는 일</div>
+        <div style="font-size:26px;color:var(--text-secondary);word-break:keep-all;">유사과학이 되는 과정</div>
+      </div>
+      <div style="display:flex;gap:40px;align-items:baseline;padding:28px 0;border-top:1px solid rgba(255,255,255,0.08);">
+        <div style="font-family:var(--font-mono);font-size:24px;color:var(--accent-amber);min-width:48px;">03</div>
+        <div style="font-size:34px;font-weight:600;min-width:380px;word-break:keep-all;">네 가지 기본 재료</div>
+        <div style="font-size:26px;color:var(--text-secondary);word-break:keep-all;">맥락·지시·형식·예시</div>
+      </div>
+      <div style="display:flex;gap:40px;align-items:baseline;padding:28px 0;border-top:1px solid rgba(255,255,255,0.08);border-bottom:1px solid rgba(255,255,255,0.08);">
+        <div style="font-family:var(--font-mono);font-size:24px;color:var(--accent-amber);min-width:48px;">04</div>
+        <div style="font-size:34px;font-weight:600;min-width:380px;word-break:keep-all;">망치는 세 가지 습관</div>
+        <div style="font-size:26px;color:var(--text-secondary);word-break:keep-all;">진단과 교정</div>
+      </div>
+    </div>
+    <div class="footer"><div class="page">09 / 80</div></div>
+  </section>
+
+  <!-- 02 — SECTION: 너무 많다 -->
+  <section class="slide s-divider amber" data-label="Section 01">
+    <div class="eyebrow amber">Section 01</div>
+    <div class="num" style="margin-top:24px;">01<span class="suffix">— 지금 너무 많다</span></div>
+    <div class="label">일주일에 두 개씩 새 개념이<br>등장하는 시대.</div>
+    <div class="rule"></div>
+    <div class="footer"><div class="page">10 / 80</div></div>
+  </section>
+
+  <!-- 03 — 용어 카오스 -->
+  <section class="slide" data-label="Too Many Terms">
+    <div class="eyebrow">용어의 홍수</div>
+    <div class="title" style="margin-top:32px;max-width:1500px;">따라가려다<br>아무것도 못 하고 있는 나.</div>
+    <div class="chips">
+      <div class="chip">컨텍스트 엔지니어링</div>
+      <div class="chip">에이전틱 워크플로우</div>
+      <div class="chip">하네스 엔지니어링</div>
+      <div class="chip">RAG</div>
+      <div class="chip">MCP</div>
+      <div class="chip">멀티모달</div>
+      <div class="chip dim">파인튜닝</div>
+      <div class="chip dim">임베딩</div>
+      <div class="chip dim">벡터 DB</div>
+      <div class="chip dim">툴 콜링</div>
+      <div class="chip dim">스트럭처드 아웃풋</div>
+      <div class="chip dim">프롬프트 인젝션</div>
+      <div class="chip dim">리즈닝 모델</div>
+      <div class="chip dim">가드레일</div>
+    </div>
+    <div class="caption" style="margin-top:56px;">뉴스레터 구독만 17개째. 그러다 자연스레 드는 생각 —</div>
+    <div class="footer"><div class="page">11 / 80</div></div>
+  </section>
+
+  <!-- 04 — 오해 -->
+  <section class="slide s-quote" data-label="Misconception">
+    <div class="mark">“</div>
+    <div class="q">프롬프트 엔지니어링?<br>그건 GPT-3 시절 얘기 아니야?</div>
+    <div class="cite"><div style="letter-spacing:0.06em;margin-bottom:14px;">흔한 오해</div>— 최근 어느 컨퍼런스 커피브레이크에서</div>
+    <div class="footer"><div class="page">12 / 80</div></div>
+  </section>
+
+  <!-- 05 — 절반 맞고 절반 틀렸다 -->
+  <section class="slide" data-label="Half True">
+    <div class="eyebrow purple">정답</div>
+    <div class="title" style="margin-top:28px;max-width:1600px;">이 생각, <span style="color:var(--accent-purple);">절반</span>은 맞고<br><span style="color:var(--accent-purple);">절반</span>은 틀렸다.</div>
+    <div class="ba" style="margin-top:64px;">
+      <div class="ba-col">
+        <div class="tag">맞는 절반</div>
+        <div class="subsection" style="margin-bottom:24px;">허술해도 소화된다.</div>
+        <div class="lede">모델이 좋아질수록 엉성한 프롬프트도 그럭저럭 결과를 냅니다. 조사 하나, 띄어쓰기 하나에 천지차이가 나던 시절은 지났습니다.</div>
+      </div>
+      <div class="ba-col after">
+        <div class="tag">틀린 절반</div>
+        <div class="subsection" style="margin-bottom:24px;">격차는 더 벌어진다.</div>
+        <div class="lede">명확한 지시를 주면 결과물의 상승폭도 같이 커집니다. 좋은 도구일수록 제대로 쓸 줄 아는 사람과 아닌 사람의 차이가 크게 납니다.</div>
+      </div>
+    </div>
+    <div class="footer"><div class="page">13 / 80</div></div>
+  </section>
+
+  <!-- 06 — 망치 비유 -->
+  <section class="slide s-analogy" data-label="Hammer Analogy">
+    <div class="eyebrow">비유 하나</div>
+    <div class="q" style="margin-top:32px;">작은 망치든 큰 망치든,<br>못을 제대로 <em>겨누지</em> 않으면<br>엄지손가락이 희생된다.</div>
+    <div class="ans">도구가 좋아졌다고<br>조준이 필요 없어지는 건 아닙니다.</div>
+    <div class="footer"><div class="page">14 / 80</div></div>
+  </section>
+
+  <!-- 07 — 기초 공사 -->
+  <section class="slide" data-label="Foundation">
+    <div class="eyebrow purple">Takeaway</div>
+    <div class="title-lg" style="margin-top:28px;">프롬프트는<br><span style="color:var(--accent-purple);">기초 공사</span>다.</div>
+    <div class="body-sec" style="margin-top:40px;max-width:1500px;font-size:30px;">
+      요즘 유행하는 개념들을 벗겨 보면 전부 프롬프트 위에서 돌아갑니다.
+    </div>
+    <div class="bullets" style="margin-top:40px;">
+      <div class="bullet"><div class="idx">→</div><div class="txt"><b>컨텍스트 엔지니어링</b> <span>— 더 정교한 맥락을 프롬프트에 담는 것</span></div></div>
+      <div class="bullet"><div class="idx">→</div><div class="txt"><b>에이전틱 워크플로우</b> <span>— 각 에이전트에게 역할과 지시를 주는 것</span></div></div>
+      <div class="bullet"><div class="idx">→</div><div class="txt"><b>하네스 엔지니어링</b> <span>— AI 옆에 자동 검수·재시도 장치를 두는 것</span></div></div>
+      <div class="bullet"><div class="idx">→</div><div class="txt"><b>RAG · MCP</b> <span>— 좋은 재료를 건네주되, 활용은 결국 프롬프트가 지시한다</span></div></div>
+    </div>
+    <div class="footer"><div class="page">15 / 80</div></div>
+  </section>
+
+  <!-- 08 — SECTION 02 -->
+  <section class="slide s-divider" data-label="Section 02">
+    <div class="eyebrow purple">Section 02</div>
+    <div class="num" style="margin-top:24px;">02<span class="suffix">— 대충 쓰면 생기는 일</span></div>
+    <div class="label">AI도, 월요일 아침 슬랙을 받은<br>신입사원과 똑같이 느낍니다.</div>
+    <div class="rule"></div>
+    <div class="footer"><div class="page">16 / 80</div></div>
+  </section>
+
+  <!-- 09 — 월요일 슬랙 -->
+  <section class="slide s-quote" data-label="Monday Slack">
+    <div class="mark">“</div>
+    <div class="q">이번 분기 주요 이슈 정리해줘.</div>
+    <div class="cite" style="margin-top:48px;"><div style="letter-spacing:0.06em;margin-bottom:14px;">월요일 아침 9시 07분</div>— 팀장님이 보낸 업무 카톡 한 줄. 매출? 프로젝트? KPI? 아니면 회식 횟수?<br style="margin-bottom:16px;">결국 아무거나 만들어서 냈다가 <span style="color:#fff;">“이게 아니잖아요”</span> 를 들었습니다.</div>
+    <div class="footer"><div class="page">17 / 80</div></div>
+  </section>
+
+  <!-- 10 — SECTION 03 -->
+  <section class="slide s-divider cyan" data-label="Section 03">
+    <div class="eyebrow cyan">Section 03</div>
+    <div class="num" style="margin-top:24px;">03<span class="suffix">— 네 가지 기본 재료</span></div>
+    <div class="label">좋은 프롬프트는<br>네 개의 재료로 이루어집니다.</div>
+    <div class="rule" style="background:var(--accent-cyan);"></div>
+    <div class="footer"><div class="page">18 / 80</div></div>
+  </section>
+
+  <!-- 11 — 네 재료 그리드 -->
+  <section class="slide" data-label="Four Ingredients">
+    <div style="display:flex;justify-content:space-between;align-items:flex-end;">
+      <div>
+        <div class="eyebrow cyan">Four Ingredients</div>
+        <div class="title" style="margin-top:24px;">역할 · 맥락 · 형식 · 제약.</div>
+      </div>
+      <div class="caption" style="max-width:520px;text-align:right;">다 넣을 필요는 없지만,<br>알고 빼는 것과 모르고 빼는 건 다릅니다.</div>
+    </div>
+    <div class="recipe">
+      <div class="card">
+        <div class="cnum">01 / Role</div>
+        <div class="ctitle">역할</div>
+        <div class="csub">너는 누구야.</div>
+        <div class="ex">
+          <span class="no">“마케팅 자료 써줘”</span>
+          <span class="yes">“너는 SaaS 스타트업에서 5년간 콘텐츠 마케팅을 해온 마케터야”</span>
+        </div>
+      </div>
+      <div class="card">
+        <div class="cnum">02 / Context</div>
+        <div class="ctitle">맥락</div>
+        <div class="csub">상황이 어떻게 돼.</div>
+        <div class="ex">
+          <span class="no">“이메일 써줘”</span>
+          <span class="yes">“클라이언트가 납기 3일 단축을 요청, 야근이 필요한 상황. 정중히 거절하되 대안 제시”</span>
+        </div>
+      </div>
+      <div class="card">
+        <div class="cnum">03 / Format</div>
+        <div class="ctitle">형식</div>
+        <div class="csub">어떻게 줘.</div>
+        <div class="ex">
+          <span class="no">“정리해줘”</span>
+          <span class="yes">“3줄 요약, 불릿 없이, 비전문가도 이해할 말로. 노션에 올릴 거야”</span>
+        </div>
+      </div>
+      <div class="card">
+        <div class="cnum">04 / Constraint</div>
+        <div class="ctitle">제약</div>
+        <div class="csub">이건 하지 마.</div>
+        <div class="ex">
+          <span class="no">(제약 없음)</span>
+          <span class="yes">“전문 용어 금지. 영어 최소화. 결론을 맨 앞에.”</span>
+        </div>
+      </div>
+    </div>
+    <div class="footer"><div class="page">19 / 80</div></div>
+  </section>
+
+  <!-- 12 — 역할 디테일 -->
+  <section class="slide" data-label="Role Deep Dive">
+    <div class="eyebrow cyan">Ingredient 01 · Role</div>
+    <div class="title" style="margin-top:24px;max-width:1500px;">역할은<br>AI의 뇌 세팅값이다.</div>
+    <div class="split" style="--cols:1fr 1fr;--gap:80px;margin-top:64px;flex:1;align-items:stretch;">
+      <div class="ba-col" style="background:var(--bg-surface);">
+        <div class="tag" style="color:var(--text-secondary);">초등학교 선생님</div>
+        <div class="body" style="color:var(--text-secondary);font-size:30px;">같은 주제를 <b style="color:#fff;">쉽고 친근하게</b>, 비유와 예시 중심으로 풀어냅니다.</div>
+      </div>
+      <div class="ba-col" style="background:var(--bg-surface);">
+        <div class="tag" style="color:var(--text-secondary);">전략 컨설턴트</div>
+        <div class="body" style="color:var(--text-secondary);font-size:30px;">같은 주제를 <b style="color:#fff;">구조적이고 데이터 중심</b>으로, 논리 프레임을 얹어 정리합니다.</div>
+      </div>
+    </div>
+    <div class="caption" style="margin-top:40px;">똑같은 질문, 완전히 다른 결과 — 한 번 직접 실험해보세요.</div>
+    <div class="footer"><div class="page">20 / 80</div></div>
+  </section>
+
+  <!-- 13 — 실전 프롬프트 해부 -->
+  <section class="slide" data-label="Real Prompt">
+    <div class="eyebrow cyan">Case Study</div>
+    <div class="title" style="margin-top:24px;">실전 프롬프트 해부.</div>
+    <div class="caption" style="margin-top:16px;max-width:1400px;">신제품 런칭 SNS 카드뉴스 초안 — 네 재료가 모두 들어간 예시.</div>
+    <div style="background:var(--bg-surface);border-radius:20px;padding:56px 64px;margin-top:48px;flex:1;display:flex;flex-direction:column;justify-content:center;">
+      <div style="font-family:var(--font-mono);font-size:26px;line-height:1.85;color:#fff;">
+        <div><span style="color:var(--accent-cyan);font-weight:600;">[역할]</span> 너는 MZ세대 타깃 브랜드의 SNS 담당 마케터야.</div>
+        <div style="margin-top:20px;"><span style="color:var(--accent-purple);font-weight:600;">[맥락]</span> 우리 제품은 직장인 대상 수면 보조 앱이고,<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;이번 주 목요일 인스타그램 런칭 포스팅 예정.</div>
+        <div style="margin-top:20px;"><span style="color:var(--accent-amber);font-weight:600;">[형식]</span> 카드뉴스 5장 구성, 각 장 한 문장 카피 + 설명 2줄씩.</div>
+        <div style="margin-top:20px;"><span style="color:var(--accent);font-weight:600;">[제약]</span> 의학적 표현 금지. ‘AI’, ‘알고리즘’ 같은 기술 용어 제외.</div>
+      </div>
+    </div>
+    <div class="caption" style="margin-top:32px;">→ 이 한 번으로 처음부터 쓸 수 있는 결과물이 나옵니다. 재요청 횟수가 확 줄어듭니다.</div>
+    <div class="footer"><div class="page">21 / 80</div></div>
+  </section>
+
+  <!-- 14 — SECTION 04 -->
+  <section class="slide s-divider amber" data-label="Section 04">
+    <div class="eyebrow amber">Section 04</div>
+    <div class="num" style="margin-top:24px;">04<span class="suffix">— 망치는 습관 셋</span></div>
+    <div class="label">아는데도 반복하는<br>세 가지 실수.</div>
+    <div class="rule"></div>
+    <div class="footer"><div class="page">22 / 80</div></div>
+  </section>
+
+  <!-- 15 — 세 습관 -->
+  <section class="slide" data-label="Three Bad Habits">
+    <div class="eyebrow amber">Three Habits to Unlearn</div>
+    <div class="title" style="margin-top:24px;">프롬프트 망치는<br>세 가지 습관.</div>
+    <div class="habits">
+      <div class="habit">
+        <div class="hnum">01</div>
+        <div class="hbody">
+          <div class="htitle">한 프롬프트에 출력 종류 여러 개 섞기.</div>
+          <div class="hdesc">요즘 모델은 다단계 작업도 곧잘 합니다. 다만 출력 종류가 갈리면(요약 + 이메일 + 슬라이드 한꺼번에) 다 얕아져요. <b style="color:#fff;">출력 종류는 하나로.</b></div>
+        </div>
+      </div>
+      <div class="habit">
+        <div class="hnum">02</div>
+        <div class="hbody">
+          <div class="htitle">맘에 안 들면 그냥 “다시 해줘”.</div>
+          <div class="hdesc">무엇이 왜 별로였는지 말해야 합니다. <b style="color:#fff;">“톤이 너무 딱딱해. 더 가볍게, 길이는 유지.”</b> 이 한 줄이 결과를 바꿉니다.</div>
+        </div>
+      </div>
+      <div class="habit">
+        <div class="hnum">03</div>
+        <div class="hbody">
+          <div class="htitle">프롬프트를 한 번만 쓰기.</div>
+          <div class="hdesc">좋은 프롬프트는 <b style="color:#fff;">대화</b>입니다. 검색이 아니라 편집 과정. 피드백을 주며 좁혀가는 쪽이 실제로 더 빠릅니다.</div>
+        </div>
+      </div>
+    </div>
+    <div class="footer"><div class="page">23 / 80</div></div>
+  </section>
+
+  <!-- 16 — 템플릿 -->
+  <section class="slide" data-label="Template">
+    <div class="eyebrow purple">Today’s Exercise</div>
+    <div class="title" style="margin-top:24px;">나만의 프롬프트 템플릿.</div>
+    <div class="caption" style="margin-top:16px;max-width:1400px;">반복 업무 하나를 떠올리고, 아래 네 칸을 채워 저장해두세요. 같은 작업마다 재사용됩니다.</div>
+    <div style="background:var(--bg-surface);border-radius:20px;padding:64px 72px;margin-top:40px;flex:1;display:flex;flex-direction:column;justify-content:center;gap:20px;font-size:28px;line-height:1.85;color:var(--text-secondary);">
+      <div style="font-size:80px;line-height:0.5;color:var(--text-tertiary);height:36px;">"</div>
+      <div>너는 <span style="color:var(--accent-purple);font-weight:600;">[역할]</span>이야.</div>
+      <div><span style="color:var(--accent-purple);font-weight:600;">[상황 · 맥락]</span>에서 <span style="color:var(--accent-purple);font-weight:600;">[결과물]</span>이 필요해.</div>
+      <div><span style="color:var(--accent-purple);font-weight:600;">[형식]</span>으로 써줘.</div>
+      <div><span style="color:var(--accent-purple);font-weight:600;">[하지 말아야 할 것]</span>은 빼줘.</div>
+      <div style="font-size:80px;line-height:0.5;color:var(--text-tertiary);height:36px;text-align:right;">”</div>
+    </div>
+    <div class="footer"><div class="page">24 / 80</div></div>
+  </section>
+
+  <!-- 17 — 마치며 -->
+  <section class="slide s-close" data-label="Closing">
+    <div class="eyebrow">마치며</div>
+    <div class="lead" style="margin-top:24px;">
+      프롬프트 엔지니어링은<br>
+      AI를 위한 기술이 아닙니다.<br>
+      <em>사람에게 일을 잘 시키는 능력</em>을<br>
+      AI에게 적용하는 것.
+    </div>
+    <div class="tag">역할을 주고 · 맥락을 설명하고 · 형태를 말하고 · 안 되는 건 못 박는다.</div>
+    <div class="footer"><div class="page">25 / 80</div></div>
+  </section>
+
+  <!-- CHAPTER 02 OPENER -->
+  <section class="slide s-title" data-label="Chapter 2 Opener">
+    <div class="glow" style="background:transparent;"></div>
+    <div class="brandmark">
+      <div class="logo" style="background:transparent;">AI</div>
+      <div>Chapter 02 · of 04</div>
+    </div>
+    <div>
+      <div class="big">컨텍스트<br>엔지니어링.</div>
+      <div class="sub">AI가 우리 회사 사람이 되는 법.<br>프롬프트는 잘 짰는데 왜 결과물이 어색할까 — 답은 AI가 우리 회사를 모른다는 데 있습니다.</div>
+    </div>
+    <div class="footer"><div class="page">26 / 80</div></div>
+  </section>
+
+  <!-- Ch.2 TOC -->
+  <section class="slide" data-label="Ch2 TOC">
+    <div class="eyebrow cyan">이번 챕터에서</div>
+    <div class="title" style="margin-top:20px;">이렇게 흘러갑니다.</div>
+    <div style="flex:1;display:flex;flex-direction:column;justify-content:center;gap:0;margin-top:36px;">
+      <div style="display:flex;gap:40px;align-items:baseline;padding:28px 0;border-top:1px solid rgba(255,255,255,0.08);">
+        <div style="font-family:var(--font-mono);font-size:24px;color:var(--accent-cyan);min-width:48px;">01</div>
+        <div style="font-size:34px;font-weight:600;min-width:380px;word-break:keep-all;">왜 아직도 어색할까</div>
+        <div style="font-size:26px;color:var(--text-secondary);word-break:keep-all;">맥락 없는 대화의 한계</div>
+      </div>
+      <div style="display:flex;gap:40px;align-items:baseline;padding:28px 0;border-top:1px solid rgba(255,255,255,0.08);">
+        <div style="font-family:var(--font-mono);font-size:24px;color:var(--accent-cyan);min-width:48px;">02</div>
+        <div style="font-size:34px;font-weight:600;min-width:380px;word-break:keep-all;">컨텍스트의 세 가지 종류</div>
+        <div style="font-size:26px;color:var(--text-secondary);word-break:keep-all;">배경·상태·목적</div>
+      </div>
+      <div style="display:flex;gap:40px;align-items:baseline;padding:28px 0;border-top:1px solid rgba(255,255,255,0.08);border-bottom:1px solid rgba(255,255,255,0.08);">
+        <div style="font-family:var(--font-mono);font-size:24px;color:var(--accent-cyan);min-width:48px;">03</div>
+        <div style="font-size:34px;font-weight:600;min-width:380px;word-break:keep-all;">컨텍스트 망치는 습관</div>
+        <div style="font-size:26px;color:var(--text-secondary);word-break:keep-all;">오염, 과부하, 방치</div>
+      </div>
+    </div>
+    <div class="footer"><div class="page">27 / 80</div></div>
+  </section>
+
+  <!-- 21 — 분명히 잘 시켰는데 -->
+  <section class="slide" data-label="Feels Off">
+    <div class="eyebrow cyan">어딘가 어색한 결과물</div>
+    <div class="title" style="margin-top:28px;max-width:1600px;">분명히 잘 시켰는데,<br>왜 이 느낌이야.</div>
+    <div class="body-sec" style="margin-top:44px;max-width:1500px;font-size:30px;">
+      역할도 줬고, 맥락도 줬고, 형식도 지정했습니다.<br>
+      그런데 받아본 결과물은 — 어딘가 ‘우리 것’이 아닙니다.
+    </div>
+    <div class="bullets" style="margin-top:48px;">
+      <div class="bullet"><div class="idx" style="color:var(--accent-cyan);">“</div><div class="txt"><span>우리 팀이 절대 안 쓰는 말투야.</span></div></div>
+      <div class="bullet"><div class="idx" style="color:var(--accent-cyan);">“</div><div class="txt"><span>우리 클라이언트한테 이런 표현 쓰면 바로 클레임 들어오는데.</span></div></div>
+      <div class="bullet"><div class="idx" style="color:var(--accent-cyan);">“</div><div class="txt"><span>이 업계에서 이걸 이렇게 설명하면, 아마추어처럼 보이는데.</span></div></div>
+    </div>
+    <div class="caption" style="margin-top:56px;max-width:1500px;">AI가 틀린 게 아닙니다. <b style="color:#fff;">우리 회사를 모르는 것</b> 뿐입니다.</div>
+    <div class="footer"><div class="page">28 / 80</div></div>
+  </section>
+
+  <!-- 22 — 입사 첫날 비유 -->
+  <section class="slide s-analogy" data-label="New Hire Analogy">
+    <div class="eyebrow cyan">비유 하나</div>
+    <div class="q" style="margin-top:32px;">입사 첫날 신입사원이<br>교과서대로만 일하는 것과 <em style="color:var(--accent-cyan);">똑같습니다.</em></div>
+    <div class="ans">틀리진 않았는데,<br>우리 팀 스타일이 아닙니다.</div>
+    <div class="footer"><div class="page">29 / 80</div></div>
+  </section>
+
+  <!-- 23 — 프롬프트 vs 컨텍스트 -->
+  <section class="slide" data-label="Prompt vs Context">
+    <div class="eyebrow cyan">한 줄 비교</div>
+    <div class="title" style="margin-top:28px;max-width:1600px;">프롬프트 엔지니어링,<br>컨텍스트 엔지니어링.</div>
+    <div class="ba" style="margin-top:56px;">
+      <div class="ba-col">
+        <div class="tag">Prompt Engineering</div>
+        <div class="subsection" style="margin-bottom:20px;">오늘 이 업무,<br>이렇게 해줘.</div>
+        <div class="lede">지시를 잘 내리는 기술.<br><b style="color:#fff;">오늘의 업무 지시서.</b></div>
+      </div>
+      <div class="ba-col after" style="background:var(--bg-surface);border:1px solid rgba(255,255,255,0.3);">
+        <div class="tag" style="color:var(--accent-cyan);">Context Engineering</div>
+        <div class="subsection" style="margin-bottom:20px;">우리 회사가 어떻게<br>돌아가는지 먼저 알아둬.</div>
+        <div class="lede">환경을 먼저 세팅하는 기술.<br><b style="color:#fff;">입사 온보딩 자료.</b></div>
+      </div>
+    </div>
+    <div class="footer"><div class="page">30 / 80</div></div>
+  </section>
+
+  <!-- 24 — 온보딩 반복 비용 -->
+  <section class="slide s-analogy" data-label="Onboarding Cost">
+    <div class="eyebrow">반복 비용</div>
+    <div class="q" style="margin-top:32px;">신입한테 <em style="color:var(--accent-cyan);">매일</em><br>같은 배경 설명을 반복하고 있다면,<br>그건 온보딩을 안 시킨 겁니다.</div>
+    <div class="ans">AI도 마찬가지. 새 대화창을 열 때마다<br>AI는 우리 회사를 모르는 상태로 초기화됩니다.</div>
+    <div class="footer"><div class="page">31 / 80</div></div>
+  </section>
+
+  <!-- 25 — Dove 카피 사례 -->
+  <section class="slide" data-label="Dove Copy Case">
+    <div class="eyebrow cyan">Case Study</div>
+    <div class="title" style="margin-top:24px;">이 Dove, 비누일까 초콜릿일까.</div>
+    <div class="caption" style="margin-top:16px;max-width:1500px;">광고 카피를 AI에게 맡겼을 때 벌어진 일.</div>
+    <div style="background:var(--bg-surface);border-radius:20px;padding:52px 64px;margin-top:40px;flex:1;display:flex;flex-direction:column;justify-content:center;gap:32px;">
+      <div style="display:flex;gap:32px;align-items:flex-start;">
+        <div style="font-family:var(--font-mono);font-size:24px;font-weight:600;color:var(--accent-cyan);letter-spacing:0.12em;min-width:140px;padding-top:6px;">REQUEST</div>
+        <div style="font-size:36px;line-height:1.45;font-weight:500;">“비누 브랜드 ‘Dove’ 신제품<br>런칭 카피 한 줄 써줘.”</div>
+      </div>
+      <div style="height:1px;background:rgba(255,255,255,0.08);"></div>
+      <div style="display:flex;gap:32px;align-items:flex-start;">
+        <div style="font-family:var(--font-mono);font-size:24px;font-weight:600;color:var(--text-secondary);letter-spacing:0.12em;min-width:140px;padding-top:6px;">RESPONSE</div>
+        <div style="font-size:32px;line-height:1.5;color:var(--text-primary);">“입안 가득 사르르 녹는 부드러운 목넘김.<br>오늘도 달콤한 한 조각의 행복!”</div>
+      </div>
+      <div style="height:1px;background:rgba(255,255,255,0.08);"></div>
+      <div style="display:flex;gap:32px;align-items:flex-start;">
+        <div style="font-family:var(--font-mono);font-size:24px;font-weight:600;color:var(--accent-amber);letter-spacing:0.12em;min-width:140px;padding-top:6px;">PROBLEM</div>
+        <div style="font-size:32px;line-height:1.5;font-weight:500;">우리 클라이언트 Dove는 <b style="color:#fff;">비누(유니레버)</b>.<br>AI는 <b>초콜릿 Dove(마스)</b>로 착각해 '먹는' 카피를 썼습니다.</div>
+      </div>
+    </div>
+    <div class="footer"><div class="page">32 / 80</div></div>
+  </section>
+
+  <!-- 26 — 실패의 정의 -->
+  <section class="slide s-quote" data-label="Failure Definition">
+    <div class="mark">“</div>
+    <div class="q">에이전트의 실패는<br>모델의 실패가 아니라<br>컨텍스트의 실패다.</div>
+    <div class="cite"><div style="letter-spacing:0.06em;margin-bottom:14px;">이 사건이 남긴 말</div>— 프롬프트는 멀쩡했습니다. 어느 Dove인지, 누가 클라이언트인지 AI가 몰랐을 뿐.</div>
+    <div class="footer"><div class="page">33 / 80</div></div>
+  </section>
+
+  <!-- 27 — 식당 예약 비유 -->
+  <section class="slide" data-label="Restaurant Analogy">
+    <div class="eyebrow">식당 예약으로 생각해보면</div>
+    <div class="title" style="margin-top:24px;">같은 ‘4명, 7시’ 라도<br>결과는 완전히 다릅니다.</div>
+    <div class="ba" style="margin-top:48px;">
+      <div class="ba-col">
+        <div class="tag">컨텍스트 없이</div>
+        <div style="background:rgba(0,0,0,0.32);border-radius:16px;padding:22px 28px;margin-top:20px;font-size:28px;line-height:1.6;color:var(--text-primary);">"4명, 7시 예약이요."</div>
+        <div class="lede" style="margin-top:24px;">식당은 일단 자리를 잡아주지만,<br>어떤 자리가 나올지는 운에 맡기는 상태입니다.</div>
+      </div>
+      <div class="ba-col" style="background:var(--bg-surface);border:1px solid rgba(255,255,255,0.3);">
+        <div class="tag" style="color:var(--accent-cyan);">컨텍스트와 함께</div>
+        <div style="background:rgba(0,0,0,0.32);border-radius:16px;padding:22px 28px;margin-top:20px;font-size:24px;line-height:1.7;color:var(--text-primary);">"4명인데 <u>70대 부모님</u>을 모시고 갑니다. <u>어머니가 계단이 불편</u>하셔서 <u>1층 자리</u>면 좋겠고, <u>조용</u>했으면 하고, <u>맵거나 자극적인 건 피하고</u> 싶습니다. 7시 예약하면 <u>주차</u>는 가능할까요?"</div>
+        <div class="lede" style="margin-top:24px;color:#fff;">원하는 결과가 나올 확률이 훨씬 높습니다.<br><span style="color:var(--text-secondary);">밑줄 = 왼쪽엔 없던 정보. AI도 정확히 이 차이로 움직입니다.</span></div>
+      </div>
+    </div>
+    <div class="footer"><div class="page">34 / 80</div></div>
+  </section>
+
+  <!-- 28 — SECTION: 3 종류 -->
+  <section class="slide s-divider cyan" data-label="Three Types Section">
+    <div class="eyebrow cyan">Three Kinds of Context</div>
+    <div class="num" style="margin-top:24px;">03<span class="suffix">— 넘겨야 할 세 가지</span></div>
+    <div class="label">무엇을 넘겨야 할지 모르겠다면,<br>세 가지로 나눠 생각하세요.</div>
+    <div class="rule" style="background:var(--accent-cyan);"></div>
+    <div class="footer"><div class="page">35 / 80</div></div>
+  </section>
+
+  <!-- 29 — 3카드 그리드 -->
+  <section class="slide" data-label="Three Kinds Grid">
+    <div style="display:flex;justify-content:space-between;align-items:flex-end;">
+      <div>
+        <div class="eyebrow cyan">Three Kinds</div>
+        <div class="title" style="margin-top:24px;">회사 · 스타일 · 히스토리.</div>
+      </div>
+      <div class="caption" style="max-width:560px;text-align:right;">모든 걸 한 번에 줄 필요는 없지만,<br>이 셋 중 뭐가 빠졌는지는 알고 있어야 합니다.</div>
+    </div>
+    <div class="recipe" style="grid-template-columns:repeat(3, 1fr);">
+      <div class="card">
+        <div class="cnum" style="color:var(--accent-cyan);">01 / Company</div>
+        <div class="ctitle">회사 · 팀</div>
+        <div class="csub">우리가 누구야.</div>
+        <div class="ex">
+          <span class="yes" style="color:var(--accent-cyan);">“브랜드 캠페인 전략을 짜는 AP 팀. 주요 클라이언트는 식음료·뷰티 광고주. 결정은 마케팅 임원.”</span>
+        </div>
+      </div>
+      <div class="card">
+        <div class="cnum" style="color:var(--accent-cyan);">02 / Style</div>
+        <div class="ctitle">스타일 · 톤</div>
+        <div class="csub">우리가 어떻게 말해.</div>
+        <div class="ex">
+          <span class="yes" style="color:var(--accent-cyan);">“인사이트 한 줄 먼저, 그다음 전략. 형용사보다 근거. ‘드립니다’ 대신 ‘합니다’.”</span>
+        </div>
+      </div>
+      <div class="card">
+        <div class="cnum" style="color:var(--accent-cyan);">03 / History</div>
+        <div class="ctitle">업무 히스토리</div>
+        <div class="csub">지금까지 어떻게 해왔어.</div>
+        <div class="ex">
+          <span class="yes" style="color:var(--accent-cyan);">“지난 PT 패인은 소비자 근거 부족. 이번 분기는 정량 조사부터 붙여 설득력 보강.”</span>
+        </div>
+      </div>
+    </div>
+    <div class="footer"><div class="page">36 / 80</div></div>
+  </section>
+
+  <!-- 30 — 회사 정보 디테일 -->
+  <section class="slide" data-label="Company Detail">
+    <div class="eyebrow cyan">Kind 01 · Company</div>
+    <div class="title" style="margin-top:24px;max-width:1600px;">이걸 알려주면,<br>타깃에 맞는 언어가 나옵니다.</div>
+    <div class="split" style="--cols:1fr 1fr;--gap:48px;margin-top:48px;flex:1;align-items:stretch;">
+      <div class="ba-col" style="background:var(--bg-surface);">
+        <div class="tag" style="color:var(--text-secondary);">컨텍스트 없이</div>
+        <div style="background:rgba(0,0,0,0.32);border-radius:16px;padding:24px 28px;margin-top:20px;font-size:24px;line-height:1.6;color:var(--text-primary);">"광고주에 낼 캠페인 전략서 써줘"</div>
+        <div class="lede" style="margin-top:24px;">→ 어느 브랜드에도 안 맞는 평균값 제안서가 나옵니다.</div>
+        <div style="background:rgba(0,0,0,0.18);border-radius:14px;padding:20px 24px;margin-top:16px;font-size:24px;line-height:1.55;color:var(--text-secondary);">"안녕하세요. 저희는 혁신적인 크리에이티브로 브랜드 가치를 높이는 에이전시입니다. 트렌디한 감각으로 차별화된 솔루션을…"</div>
+      </div>
+      <div class="ba-col" style="background:var(--bg-surface);border:1px solid rgba(255,255,255,0.3);">
+        <div class="tag" style="color:var(--accent-cyan);">컨텍스트 추가</div>
+        <div style="display:flex;flex-direction:column;gap:12px;margin-top:20px;font-size:24px;line-height:1.55;">
+          <div><span style="color:var(--accent-cyan);font-weight:600;">클라이언트</span> &nbsp; 신제품 앞둔 식음료 브랜드</div>
+          <div><span style="color:var(--accent-cyan);font-weight:600;">소비자</span> &nbsp; 20·30대, 카테고리 저관여층</div>
+          <div><span style="color:var(--accent-cyan);font-weight:600;">경쟁</span> &nbsp; 같은 경쟁 PT 에 들어온 에이전시 3곳</div>
+          <div><span style="color:var(--accent-cyan);font-weight:600;">핵심 KPI</span> &nbsp; 캠페인 후 구매의향·브랜드 선호도</div>
+        </div>
+        <div class="lede" style="margin-top:24px;">→ 소비자가 진짜 망설이는 한 순간부터 시작합니다.</div>
+        <div style="background:rgba(0,0,0,0.28);border-radius:14px;padding:20px 24px;margin-top:16px;font-size:24px;line-height:1.6;color:var(--text-primary);"><b style="color:var(--accent-cyan);">"왜 20대는 굳이 우리 걸 고를까"</b> — 광고주가 가장 자주 놓치는 그 망설임의 순간부터 풀었습니다.</div>
+      </div>
+    </div>
+    <div class="footer"><div class="page">37 / 80</div></div>
+  </section>
+
+  <!-- 31 — 컨텍스트 문서 템플릿 -->
+  <section class="slide" data-label="Context Template">
+    <div class="eyebrow purple">Today's Exercise</div>
+    <div class="title" style="margin-top:24px;">나만의 컨텍스트 문서.</div>
+    <div class="caption" style="margin-top:16px;max-width:1500px;">복잡할 필요 없습니다. 아래 다섯 문장을 채우면, 그게 우리 팀 온보딩 자료입니다.</div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:48px;margin-top:32px;flex:none;align-items:stretch;">
+      <div style="background:var(--bg-surface);border-radius:20px;padding:36px 48px;display:flex;flex-direction:column;justify-content:flex-start;">
+        <div class="eyebrow" style="color:var(--text-secondary);margin-bottom:20px;">템플릿</div>
+        <div style="display:flex;flex-direction:column;gap:16px;font-size:24px;line-height:1.6;color:var(--text-secondary);">
+          <div>우리 팀은 <span style="color:var(--accent-purple);font-weight:600;">[무엇을 하는 곳]</span>이야.</div>
+          <div>주요 고객은 <span style="color:var(--accent-purple);font-weight:600;">[누구]</span>이고, 그들이 신경 쓰는 건 <span style="color:var(--accent-purple);font-weight:600;">[무엇]</span>이야.</div>
+          <div>우리 팀 글쓰기 원칙은 <span style="color:var(--accent-purple);font-weight:600;">[어떻게]</span>.</div>
+          <div>절대 쓰면 안 되는 표현은 <span style="color:var(--accent-purple);font-weight:600;">[무엇]</span>.</div>
+          <div>지금 집중하는 과제는 <span style="color:var(--accent-purple);font-weight:600;">[무엇]</span>이야.</div>
+        </div>
+      </div>
+      <div style="background:var(--bg-surface);border:1px solid rgba(255,255,255,0.3);border-radius:20px;padding:36px 48px;display:flex;flex-direction:column;justify-content:flex-start;">
+        <div class="eyebrow" style="color:var(--accent-purple);margin-bottom:20px;">내 회사로 채워보면</div>
+        <div style="display:flex;flex-direction:column;gap:16px;font-size:24px;line-height:1.6;color:var(--text-primary);">
+          <div>우리 팀은 <b style="color:var(--accent-purple);text-decoration:underline;text-underline-offset:5px;">브랜드의 시장·소비자를 깊게 조사</b>해 인사이트를 찾고, 그에 맞는 전략·크리에이티브를 제안하는 AP 부서야.</div>
+          <div>주요 고객은 <b style="color:var(--accent-purple);text-decoration:underline;text-underline-offset:5px;">신제품·캠페인을 앞둔 광고주</b>. 신경 쓰는 건 매출보다 '왜 우리 브랜드여야 하나'의 설득력이야.</div>
+          <div>우리 팀 글쓰기 원칙은 <b style="color:var(--accent-purple);text-decoration:underline;text-underline-offset:5px;">소비자 인사이트 한 줄 먼저, 그다음 전략</b>. 형용사보다 근거.</div>
+          <div>절대 쓰면 안 되는 표현은 <b style="color:var(--accent-purple);text-decoration:underline;text-underline-offset:5px;">'요즘 트렌드' · '혁신적인' · '차별화'</b>. 근거 없이 공허한 단어 셋.</div>
+          <div>지금 집중하는 과제는 <b style="color:var(--accent-purple);text-decoration:underline;text-underline-offset:5px;">다음 달 경쟁 PT</b>. 이기면 1년 캠페인 수주, 지면 끝.</div>
+        </div>
+      </div>
+    </div>
+    <div class="footer"><div class="page">38 / 80</div></div>
+  </section>
+
+  <!-- 32 — SECTION: 망치는 습관 -->
+  <section class="slide s-divider amber" data-label="Bad Habits Section">
+    <div class="eyebrow amber">Three Habits to Avoid</div>
+    <div class="num" style="margin-top:24px;">04<span class="suffix">— 컨텍스트 망치는 법</span></div>
+    <div class="label">잘 만들어 놓고도<br>쓸모없게 되는 세 가지 이유.</div>
+    <div class="rule"></div>
+    <div class="footer"><div class="page">39 / 80</div></div>
+  </section>
+
+  <!-- 33 — 3 습관 -->
+  <section class="slide" data-label="Three Context Habits">
+    <div class="eyebrow amber">Three Habits to Avoid</div>
+    <div class="title" style="margin-top:24px;">컨텍스트 망치는<br>세 가지 습관.</div>
+    <div class="habits">
+      <div class="habit">
+        <div class="hnum">01</div>
+        <div class="hbody">
+          <div class="htitle">회사 소개서 20장을 통째로 넣기.</div>
+          <div class="hdesc">너무 많으면 AI는 뭐가 중요한지 모릅니다. <b style="color:#fff;">3~5 문단이면 충분합니다.</b> 길이가 아니라 밀도가 핵심.</div>
+        </div>
+      </div>
+      <div class="habit">
+        <div class="hnum">02</div>
+        <div class="hbody">
+          <div class="htitle">한 번 만들고 방치하기.</div>
+          <div class="hdesc">3개월 전 컨텍스트를 지금도 쓰고 있다면 점검이 필요합니다. 팀과 전략이 바뀌면 <b style="color:#fff;">살아있는 문서처럼</b> 업데이트해야 합니다.</div>
+        </div>
+      </div>
+      <div class="habit">
+        <div class="hnum">03</div>
+        <div class="hbody">
+          <div class="htitle">모든 작업에 같은 컨텍스트 쓰기.</div>
+          <div class="hdesc">고객사 이메일용과 사내 보고서용은 달라야 합니다. <b style="color:#fff;">용도별로 버전</b>을 나눠두면 결과물이 훨씬 정확해집니다.</div>
+        </div>
+      </div>
+    </div>
+    <div class="footer"><div class="page">40 / 80</div></div>
+  </section>
+
+  <!-- 34 — 오늘의 실습 -->
+  <section class="slide" data-label="Today Exercise">
+    <div class="eyebrow purple">오늘 당장 해보는 실습</div>
+    <div class="title" style="margin-top:24px;">지금,<br>세 줄만 적어보세요.</div>
+    <div class="body-sec" style="margin-top:32px;max-width:1500px;font-size:30px;">
+      이걸 다음 AI 대화 맨 앞에 붙여넣기만 해도 결과물이 확 달라집니다. 체감이 바로 옵니다.
+    </div>
+    <div class="bullets" style="margin-top:48px;">
+      <div class="bullet"><div class="idx">01</div><div class="txt"><b>우리 팀이 하는 일</b> <span>— 한 줄 요약.</span></div></div>
+      <div class="bullet"><div class="idx">02</div><div class="txt"><b>절대 안 쓰는 표현 두 가지</b> <span>— 금지어 리스트.</span></div></div>
+      <div class="bullet"><div class="idx">03</div><div class="txt"><b>지금 가장 중요한 과제 한 가지</b> <span>— 이번 분기의 초점.</span></div></div>
+    </div>
+    <div class="footer"><div class="page">41 / 80</div></div>
+  </section>
+
+  <!-- 35 — 마치며 Ch2 & 다음 챕터 예고 -->
+  <section class="slide s-close" data-label="Closing Ch2">
+    <div class="eyebrow cyan">마치며</div>
+    <div class="lead" style="margin-top:24px;">
+      프롬프트 엔지니어링이 <em style="color:var(--accent-purple);">업무 지시</em>라면,<br>
+      컨텍스트 엔지니어링은<br>
+      <em style="color:var(--accent-cyan);">AI를 우리 팀원으로 만드는</em> 일.
+    </div>
+    <div style="margin-top:56px;padding-top:32px;border-top:1px solid rgba(255,255,255,0.12);display:flex;justify-content:space-between;align-items:baseline;gap:48px;max-width:1720px;">
+      <div>
+        <div style="font-family:var(--font-mono);font-size:24px;color:var(--accent-purple);letter-spacing:0.14em;text-transform:uppercase;font-weight:600;">→ Next Chapter</div>
+        <div style="font-size:44px;font-weight:600;line-height:1.25;margin-top:12px;letter-spacing:-0.012em;">팀원 한 명에서 AI 드림팀으로.</div>
+      </div>
+    </div>
+    <div class="footer"><div class="page">42 / 80</div></div>
+  </section>
+
+  <!-- ════════════════════════════════════════════════════════════
+       CHAPTER 03 — 에이전틱 엔지니어링
+       ════════════════════════════════════════════════════════════ -->
+
+  <!-- CHAPTER 03 OPENER -->
+  <section class="slide s-title" data-label="Chapter 3 Opener">
+    <div class="glow" style="background:transparent;"></div>
+    <div class="brandmark">
+      <div class="logo" style="background:transparent;">AI</div>
+      <div>Chapter 03 · of 04</div>
+    </div>
+    <div>
+      <div class="big">에이전틱<br>엔지니어링.</div>
+      <div class="sub">AI 드림팀 꾸리는 법. 팀원 한 명을 잘 키웠으니,<br>이제 한 명에서 조직으로 — 팀을 설계할 차례입니다.</div>
+    </div>
+    <div class="footer"><div class="page">43 / 80</div></div>
+  </section>
+
+  <!-- Ch.3 TOC -->
+  <section class="slide" data-label="Ch3 TOC">
+    <div class="eyebrow purple">이번 챕터에서</div>
+    <div class="title" style="margin-top:20px;">이렇게 흘러갑니다.</div>
+    <div style="flex:1;display:flex;flex-direction:column;justify-content:center;gap:0;margin-top:36px;">
+      <div style="display:flex;gap:40px;align-items:baseline;padding:28px 0;border-top:1px solid rgba(255,255,255,0.08);">
+        <div style="font-family:var(--font-mono);font-size:24px;color:var(--accent-purple);min-width:48px;">01</div>
+        <div style="font-size:34px;font-weight:600;min-width:380px;word-break:keep-all;">에이전틱 AI란</div>
+        <div style="font-size:26px;color:var(--text-secondary);word-break:keep-all;">판단하고 행동하는 구조</div>
+      </div>
+      <div style="display:flex;gap:40px;align-items:baseline;padding:28px 0;border-top:1px solid rgba(255,255,255,0.08);">
+        <div style="font-family:var(--font-mono);font-size:24px;color:var(--accent-purple);min-width:48px;">02</div>
+        <div style="font-size:34px;font-weight:600;min-width:380px;word-break:keep-all;">에이전트의 실체</div>
+        <div style="font-size:26px;color:var(--text-secondary);word-break:keep-all;">상태이자 설계물</div>
+      </div>
+      <div style="display:flex;gap:40px;align-items:baseline;padding:28px 0;border-top:1px solid rgba(255,255,255,0.08);">
+        <div style="font-family:var(--font-mono);font-size:24px;color:var(--accent-purple);min-width:48px;">03</div>
+        <div style="font-size:34px;font-weight:600;min-width:380px;word-break:keep-all;">도구</div>
+        <div style="font-size:26px;color:var(--text-secondary);word-break:keep-all;">Claude Code 한 가지로</div>
+      </div>
+      <div style="display:flex;gap:40px;align-items:baseline;padding:28px 0;border-top:1px solid rgba(255,255,255,0.08);border-bottom:1px solid rgba(255,255,255,0.08);">
+        <div style="font-family:var(--font-mono);font-size:24px;color:var(--accent-purple);min-width:48px;">04</div>
+        <div style="font-size:34px;font-weight:600;min-width:380px;word-break:keep-all;">주의사항</div>
+        <div style="font-size:26px;color:var(--text-secondary);word-break:keep-all;">가능성만큼의 리스크</div>
+      </div>
+    </div>
+    <div class="footer"><div class="page">44 / 80</div></div>
+  </section>
+
+  <!-- 38 — 여전히 수동적 -->
+  <section class="slide s-quote" data-label="Still Manual">
+    <div class="mark">“</div>
+    <div class="q">리서치하고, 정리하고, 초안 쓰고,<br>검토하고... 이거 전부 내가<br>하나씩 시켜야 해?</div>
+    <div class="cite"><div style="letter-spacing:0.06em;margin-bottom:14px;">아직 뭔가 이상하다</div>— 역할도 줬고, 온보딩도 시켰습니다. 근데 AI는 여전히 수동적입니다.<br>AI 한 명짜리 직원으로만 쓰고 있는 겁니다.</div>
+    <div class="footer"><div class="page">45 / 80</div></div>
+  </section>
+
+  <!-- 39 — 컨텍스트 vs 에이전틱 비교 -->
+  <section class="slide" data-label="Context vs Agentic">
+    <div class="eyebrow purple">한 줄 비교</div>
+    <div class="title" style="margin-top:28px;max-width:1600px;">컨텍스트 엔지니어링,<br>에이전틱 엔지니어링.</div>
+    <div class="ba" style="margin-top:56px;grid-template-columns:1fr 88px 1fr;">
+      <div class="ba-col" style="border:1px solid rgba(255,255,255,0.07);">
+        <div class="tag">Context Engineering</div>
+        <div class="subsection" style="margin-bottom:20px;">좋은 팀원<br>한 명 만들기.</div>
+        <div class="lede">AI한테 우리 회사 사정 알려주기.<br><b style="color:#fff;">팀원 온보딩.</b></div>
+        <div class="lede" style="margin-top:auto;color:var(--text-tertiary);">지난 편에서 끝낸 기본기</div>
+      </div>
+      <div style="display:flex;align-items:center;justify-content:center;font-size:56px;font-weight:300;color:var(--text-secondary);">→</div>
+      <div class="ba-col after" style="background:var(--bg-elevated);border:1px solid rgba(255,255,255,0.55);position:relative;overflow:hidden;">
+        <div style="position:absolute;top:0;left:0;right:0;height:4px;background:#fff;"></div>
+        <div class="tag" style="color:#fff;display:flex;align-items:baseline;gap:16px;">Agentic Engineering <span style="font-size:20px;letter-spacing:0.02em;text-transform:none;font-weight:500;color:var(--text-secondary);">오늘의 목적지</span></div>
+        <div class="subsection" style="margin-bottom:20px;color:#fff;">그 팀원들로<br>조직 설계하기.</div>
+        <div class="lede">각자 역할 다른 AI 여러 명이<br>알아서 협력하게 만들기.<br><b style="color:#fff;">팀 자체를 설계.</b></div>
+      </div>
+    </div>
+    <div class="footer"><div class="page">46 / 80</div></div>
+  </section>
+
+  <!-- 40 — 슈퍼맨 직원은 없다 -->
+  <section class="slide s-analogy" data-label="No Superman">
+    <div class="eyebrow">현실 직장과 똑같습니다</div>
+    <div class="q" style="margin-top:32px;">혼자 다 잘하는 슈퍼맨 직원은<br>퇴사 직전이거나, 번아웃 중이거나,<br><em style="color:var(--accent-purple);">사실 다 못 하고 있거나.</em></div>
+    <div class="ans">그래서 우리는 팀을 꾸립니다.<br>에이전틱 엔지니어링도 똑같습니다.</div>
+    <div class="footer"><div class="page">47 / 80</div></div>
+  </section>
+
+  <!-- 41 — 기존 방식 vs 에이전틱 워크플로우 -->
+  <section class="slide" data-label="Workflow Comparison">
+    <div class="eyebrow purple">경쟁사 분석 보고서 하나 만들 때</div>
+    <div class="title" style="margin-top:24px;max-width:1600px;">5번 시키거나, 한 번 시키거나.</div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:48px;margin-top:48px;flex:1;">
+      <div class="ba-col" style="background:var(--bg-surface);">
+        <div class="tag">기존 방식 — AI 한 명</div>
+        <div style="display:flex;flex-direction:column;gap:16px;margin-top:24px;">
+          <div style="display:flex;gap:20px;align-items:center;"><div style="font-family:var(--font-mono);color:var(--text-tertiary);font-size:24px;min-width:40px;">01</div><div style="font-size:26px;">"경쟁사 A 조사해줘" → 결과</div></div>
+          <div style="display:flex;gap:20px;align-items:center;"><div style="font-family:var(--font-mono);color:var(--text-tertiary);font-size:24px;min-width:40px;">02</div><div style="font-size:26px;">"경쟁사 B 조사해줘" → 결과</div></div>
+          <div style="display:flex;gap:20px;align-items:center;"><div style="font-family:var(--font-mono);color:var(--text-tertiary);font-size:24px;min-width:40px;">03</div><div style="font-size:26px;">"비교 정리해줘" → 결과</div></div>
+          <div style="display:flex;gap:20px;align-items:center;"><div style="font-family:var(--font-mono);color:var(--text-tertiary);font-size:24px;min-width:40px;">04</div><div style="font-size:26px;">"보고서 써줘" → 결과</div></div>
+          <div style="display:flex;gap:20px;align-items:center;"><div style="font-family:var(--font-mono);color:var(--text-tertiary);font-size:24px;min-width:40px;">05</div><div style="font-size:26px;">"임원용으로 다듬어줘" → 결과</div></div>
+        </div>
+        <div style="margin-top:28px;font-size:24px;color:var(--text-secondary);">중간에 내가 5번 개입. 단톡에서 혼자 심부름 목록 읽어주는 셈.</div>
+      </div>
+      <div class="ba-col after" style="background:var(--bg-surface);border-color:rgba(255,255,255,0.3);">
+        <div class="tag" style="color:var(--accent-purple);">에이전틱 방식 — AI 팀</div>
+        <div style="margin-top:24px;background:rgba(0,0,0,0.32);border-radius:16px;padding:24px 28px;font-size:28px;line-height:1.6;color:var(--text-primary);">"경쟁사 3곳 분석해서<br>임원 발표용 보고서 만들어줘."</div>
+        <div style="display:flex;flex-direction:column;gap:14px;margin-top:24px;">
+          <div style="font-size:26px;"><span style="color:var(--accent-purple);font-weight:600;">리서치 에이전트</span> → 각사 정보 수집</div>
+          <div style="font-size:26px;"><span style="color:var(--accent-purple);font-weight:600;">분석 에이전트</span> → 비교 프레임 가공</div>
+          <div style="font-size:26px;"><span style="color:var(--accent-purple);font-weight:600;">작성 에이전트</span> → 보고서 초안</div>
+          <div style="font-size:26px;"><span style="color:var(--accent-purple);font-weight:600;">검토 에이전트</span> → 임원 기준 다듬기</div>
+        </div>
+        <div style="margin-top:28px;font-size:24px;color:#fff;font-weight:600;">나는 지시 한 번, 결과만 받는다.</div>
+      </div>
+    </div>
+    <div class="caption" style="margin-top:24px;max-width:1600px;">단, 비용은 단일 호출의 <b style="color:#fff;">10~15배</b>. 진짜 분기·병렬이 필요할 때만 — 사실 단일 에이전트 + 좋은 컨텍스트가 이기는 경우가 더 많습니다.</div>
+    <div class="footer"><div class="page">48 / 80</div></div>
+  </section>
+
+  <!-- 42 — 채팅창에서는 안 된다 -->
+  <section class="slide" data-label="Chat Limit">
+    <div class="eyebrow purple">현실 직면</div>
+    <div class="title" style="margin-top:24px;max-width:1600px;">ChatGPT · Claude 채팅창은<br>원래 '1:1 대화'용입니다.</div>
+    <div class="bullets" style="margin-top:56px;">
+      <div class="bullet"><div class="idx">→</div><div class="txt"><b>한 번에 한 사람과 한 가지 대화</b> <span>— 에이전트끼리 서로 말을 주고받진 않습니다.</span></div></div>
+      <div class="bullet"><div class="idx">→</div><div class="txt"><b>결과를 자동으로 넘기지 않습니다</b> <span>— 중간 연결은 내가 해야 합니다.</span></div></div>
+      <div class="bullet"><div class="idx">→</div><div class="txt"><b>여러 작업을 동시에 굴리긴 어렵습니다</b> <span>— 병렬 실행은 기본 동작이 아닙니다.</span></div></div>
+      <div class="bullet"><div class="idx">→</div><div class="txt"><b>창을 닫으면 흐름이 끊깁니다</b> <span>— 대화창은 1:1 대화 도구입니다.</span></div></div>
+    </div>
+    <div class="caption" style="margin-top:48px;max-width:1600px;">ChatGPT Tasks · Claude Projects 같은 신기능으로 흉내 낼 수는 있어요. 직접 쓰고 있다면 — <b style="color:#fff;">고수 인정</b>. 다만 대부분은 아직 1:1 대화로 씁니다. 그래서 <b style="color:#fff;">도구가 따로 있습니다.</b> 다만, 알고 써야 합니다.</div>
+    <div class="footer"><div class="page">49 / 80</div></div>
+  </section>
+
+  <!-- 43 — 에이전트의 실체 -->
+  <section class="slide" data-label="Agent Reality">
+    <div class="eyebrow purple">개념 정의</div>
+    <div class="title" style="margin-top:20px;max-width:1600px;">에이전트는 '상태'입니다.<br>인격도, 봇도 아닙니다.</div>
+    <div style="flex:1;display:flex;flex-direction:column;gap:28px;margin-top:40px;min-height:0;">
+      <div style="flex:1;display:grid;grid-template-columns:1fr 1fr;grid-template-rows:1fr 1fr;gap:24px;min-height:0;">
+        <div style="background:var(--bg-surface);border-radius:18px;padding:36px 44px;display:flex;flex-direction:column;gap:14px;">
+          <div style="font-size:28px;font-weight:600;color:var(--accent-purple);">배우와 대본</div>
+          <div style="font-size:28px;color:var(--text-secondary);line-height:1.65;word-break:keep-all;">LLM이라는 '배우'에게 우리가 미리 적어둔 <b style="color:#fff;">역할 설명서와 업무 매뉴얼</b>을 쥐여준 상태. 배우는 고정, 대본은 우리가 설계합니다.</div>
+        </div>
+        <div style="background:var(--bg-surface);border-radius:18px;padding:36px 44px;display:flex;flex-direction:column;gap:14px;">
+          <div style="font-size:28px;font-weight:600;color:var(--accent-purple);">그때만 살아있는 직원</div>
+          <div style="font-size:28px;color:var(--text-secondary);line-height:1.65;word-break:keep-all;">여러분이 부르면 그 순간만 일어나서 일을 합니다. 대화창을 닫으면 사라집니다 — 인격이 아니라 <b style="color:#fff;">그 순간의 상태</b>입니다.</div>
+        </div>
+        <div style="background:var(--bg-surface);border-radius:18px;padding:36px 44px;display:flex;flex-direction:column;gap:14px;">
+          <div style="font-size:28px;font-weight:600;color:var(--accent-purple);">만든다 = 일할 환경을 짠다</div>
+          <div style="font-size:28px;color:var(--text-secondary);line-height:1.65;word-break:keep-all;">에이전트를 만드는 건 AI 한 명을 영입하는 게 아니라, AI가 들어와서 일할 <b style="color:#fff;">사무실과 매뉴얼</b>을 미리 차려두는 일에 가깝습니다.</div>
+        </div>
+        <div style="background:var(--bg-surface);border-radius:18px;padding:36px 44px;display:flex;flex-direction:column;gap:14px;">
+          <div style="font-size:28px;font-weight:600;color:var(--accent-purple);">에이전틱 워크플로우</div>
+          <div style="font-size:28px;color:var(--text-secondary);line-height:1.65;word-break:keep-all;">이 일시적 상태들이 판단하고, 행동하고, 결과를 다음 단계로 넘깁니다. 그 <b style="color:#fff;">이어달리기 자체</b>가 에이전틱 워크플로우입니다.</div>
+        </div>
+      </div>
+      <div class="caption" style="color:var(--text-secondary);max-width:1600px;word-break:keep-all;">"에이전트는 AI의 영혼이 아니라, 여러분이 설계한 매뉴얼과 LLM의 뇌가 만나 <b style="color:#fff;">스파크가 튀는 그 순간</b>의 이름입니다."</div>
+    </div>
+    <div class="footer"><div class="page">50 / 80</div></div>
+  </section>
+
+  <!-- 46 — 프롬프트 인젝션 경고 -->
+  <section class="slide" data-label="Prompt Injection Warning">
+    <div class="eyebrow amber">주의</div>
+    <div class="title" style="margin-top:28px;max-width:1600px;">AI가 행동하면,<br>실수의 파장도 커집니다.</div>
+    <div class="ba" style="margin-top:48px;">
+      <div class="ba-col" style="background:var(--bg-surface);">
+        <div class="tag" style="color:var(--accent-amber);">프롬프트 인젝션이란</div>
+        <div style="font-size:27px;line-height:1.65;margin-top:16px;color:var(--text-secondary);">문서나 웹페이지 안에 <b style="color:#fff;">눈에 보이지 않는 명령을 숨겨두는 공격</b>. 흰 글씨, 0.1줄 간격으로 숨긴 텍스트를 AI가 읽는 순간, "사용자의 지시"로 착각하고 실행합니다.</div>
+      </div>
+      <div class="ba-col" style="background:rgba(255,255,255,0.08);border:1px solid rgba(255,255,255,0.3);">
+        <div class="tag" style="color:var(--accent-amber);">실제로 벌어진 일</div>
+        <div style="font-size:27px;line-height:1.75;margin-top:16px;color:var(--text-secondary);">악성 명령이 숨겨진 <span style="background:rgba(255,255,255,0.15);padding:3px 10px;border-radius:6px;font-family:var(--font-mono);font-size:24px;color:var(--accent-amber);">.docx</span> 파일 하나를 업로드했더니, <b style="color:#fff;">사용자 승인 없이 로컬 기밀 파일이 외부로 전송</b>됐습니다. 최근 공개된 에이전틱 AI 보안 리서치에서 실제 시연된 공격.</div>
+      </div>
+    </div>
+    <div class="caption" style="margin-top:36px;max-width:1500px;">일은 엄청 잘하는데 회사 기밀을 함부로 들고 다니는 직원. 그래서 많은 대기업이 에이전틱 도구 사내 도입을 선제적으로 차단합니다.</div>
+    <div class="footer"><div class="page">51 / 80</div></div>
+  </section>
+
+  <!-- 47 — 알고 쓰는 법 -->
+  <section class="slide" data-label="How to Use Safely">
+    <div class="eyebrow amber">쓰지 말라는 게 아닙니다</div>
+    <div class="title" style="margin-top:24px;max-width:1600px;"><span style="color:var(--accent-amber);">알고</span> 쓰라는 겁니다.</div>
+    <div class="bullets" style="margin-top:56px;">
+      <div class="bullet"><div class="idx">01</div><div class="txt"><b>폴더를 분리하세요</b> <span>— 에이전트가 접근할 폴더와 없는 폴더를 명확히 구분.</span></div></div>
+      <div class="bullet"><div class="idx">02</div><div class="txt"><b>외부 파일은 주의</b> <span>— 이메일 첨부, 웹 문서를 AI가 처리할 때는 한 번 더 확인.</span></div></div>
+      <div class="bullet"><div class="idx">03</div><div class="txt"><b>API 키는 격리</b> <span>— .env 파일이나 비밀번호가 있는 폴더는 작업 디렉토리 밖에.</span></div></div>
+      <div class="bullet"><div class="idx">04</div><div class="txt"><b>외부 전송 요청은 확인</b> <span>— 에이전트가 데이터를 외부로 보내려 할 때 반드시 승인.</span></div></div>
+    </div>
+    <div class="footer"><div class="page">52 / 80</div></div>
+  </section>
+
+  <!-- 48 — 지금 당장 채팅창에서 -->
+  <section class="slide" data-label="Start Now With Chat">
+    <div class="eyebrow purple">도구 없이 지금 당장</div>
+    <div class="title" style="margin-top:24px;max-width:1600px;">대화창을<br>목적별로 나누세요.</div>
+    <div class="recipe" style="grid-template-columns:repeat(4,1fr);margin-top:48px;">
+      <div class="card">
+        <div class="cnum" style="color:var(--accent-purple);">창 01</div>
+        <div class="ctitle" style="font-size:36px;">리서치</div>
+        <div class="csub">역할: 정보 수집가</div>
+        <div class="ex"><span class="yes" style="color:var(--accent-purple);">경쟁사 A·B·C 각각 최신 동향 수집</span></div>
+      </div>
+      <div class="card">
+        <div class="cnum" style="color:var(--accent-purple);">창 02</div>
+        <div class="ctitle" style="font-size:36px;">분석</div>
+        <div class="csub">역할: 비교 분석가</div>
+        <div class="ex"><span class="yes" style="color:var(--accent-purple);">창 01 결과 붙여넣고 비교 프레임 작성</span></div>
+      </div>
+      <div class="card">
+        <div class="cnum" style="color:var(--accent-purple);">창 03</div>
+        <div class="ctitle" style="font-size:36px;">작성</div>
+        <div class="csub">역할: 글쓰기 전문가</div>
+        <div class="ex"><span class="yes" style="color:var(--accent-purple);">창 02 결과 붙여넣고 보고서 초안</span></div>
+      </div>
+      <div class="card">
+        <div class="cnum" style="color:var(--accent-purple);">창 04</div>
+        <div class="ctitle" style="font-size:36px;">검토</div>
+        <div class="csub">역할: 품질 검토자</div>
+        <div class="ex"><span class="yes" style="color:var(--accent-purple);">창 03 결과 붙여넣고 임원 기준 다듬기</span></div>
+      </div>
+    </div>
+    <div class="caption" style="margin-top:36px;">수동이지만 에이전틱 사고 방식을 지금 당장 연습할 수 있습니다. 나중에 도구로 연결할 때 훨씬 빠릅니다.</div>
+    <div class="footer"><div class="page">53 / 80</div></div>
+  </section>
+
+  <!-- 49 — 오케스트레이션 = 지휘자 -->
+  <section class="slide s-quote" data-label="Orchestration Quote">
+    <div class="mark">“</div>
+    <div class="q">지휘자는<br>직접 악기를 연주하지 않습니다.<br>그게 포인트입니다.</div>
+    <div class="cite"><div style="letter-spacing:0.06em;margin-bottom:14px;">핵심은 오케스트레이션</div>— 바이올린, 첼로, 피아노. 다 훌륭해도 지휘자 없으면 소음입니다.<br>에이전틱 엔지니어링에서 여러분의 역할이 바로 <span style="color:var(--accent-purple);">지휘자</span>입니다.</div>
+    <div class="footer"><div class="page">54 / 80</div></div>
+  </section>
+
+  <!-- 50 — 망치는 습관 3가지 -->
+  <section class="slide" data-label="Three Agentic Bad Habits">
+    <div class="eyebrow amber">Three Habits to Unlearn</div>
+    <div class="title" style="margin-top:24px;">에이전틱 시스템<br>망치는 세 가지 습관.</div>
+    <div class="habits">
+      <div class="habit">
+        <div class="hnum">01</div>
+        <div class="hbody">
+          <div class="htitle">에이전트 한 명한테 너무 많은 역할 주기.</div>
+          <div class="hdesc">"리서치도 하고, 분석도 하고, 보고서도 써줘" — 슈퍼맨 요구입니다. <b style="color:#fff;">역할은 쪼갤수록 정확해집니다.</b></div>
+        </div>
+      </div>
+      <div class="habit">
+        <div class="hnum">02</div>
+        <div class="hbody">
+          <div class="htitle">흐름 없이 그냥 여러 AI 쓰기.</div>
+          <div class="hdesc">각자 따로 쓰는 건 에이전틱이 아닙니다. <b style="color:#fff;">A의 결과가 B의 입력이 되는 구조</b>가 있어야 시스템입니다.</div>
+        </div>
+      </div>
+      <div class="habit">
+        <div class="hnum">03</div>
+        <div class="hbody">
+          <div class="htitle">사람의 판단 포인트를 없애기.</div>
+          <div class="hdesc">전부 자동화하고 싶은 마음은 이해합니다. 하지만 <b style="color:#fff;">중요한 결정에서 사람이 빠지면</b> 나중에 큰일 납니다. 처음부터 명확히 나눠두세요.</div>
+        </div>
+      </div>
+    </div>
+    <div class="footer"><div class="page">55 / 80</div></div>
+  </section>
+
+  <!-- 51 — 오늘 실습 (4문 4답) -->
+  <section class="slide" data-label="Agentic Exercise">
+    <div class="eyebrow purple">오늘 당장 해보는 실습</div>
+    <div class="title" style="margin-top:24px;">반복 업무 하나를<br>단계별로 쪼개보세요.</div>
+    <div class="recipe" style="grid-template-columns:repeat(4,1fr);margin-top:56px;">
+      <div class="card">
+        <div class="cnum" style="color:var(--accent-purple);">Q1</div>
+        <div class="ctitle" style="font-size:36px;line-height:1.2;">단계를<br>쪼개면?</div>
+        <div class="csub">이 업무의 단계를 나열하면 뭐가 있는지 적어보세요.</div>
+      </div>
+      <div class="card">
+        <div class="cnum" style="color:var(--accent-purple);">Q2</div>
+        <div class="ctitle" style="font-size:36px;line-height:1.2;">AI가 할 수<br>있는 건?</div>
+        <div class="csub">각 단계에서 AI가 맡을 수 있는 부분을 표시하세요.</div>
+      </div>
+      <div class="card">
+        <div class="cnum" style="color:var(--accent-purple);">Q3</div>
+        <div class="ctitle" style="font-size:36px;line-height:1.2;">내가 판단할<br>순간은?</div>
+        <div class="csub">사람이 직접 결정해야 하는 체크포인트를 정하세요.</div>
+      </div>
+      <div class="card">
+        <div class="cnum" style="color:var(--accent-purple);">Q4</div>
+        <div class="ctitle" style="font-size:36px;line-height:1.2;">결과물은<br>어디서?</div>
+        <div class="csub">최종 결과가 어떤 형태로 어디서 나와야 하는지 정하세요.</div>
+      </div>
+    </div>
+    <div class="caption" style="margin-top:36px;">이 네 가지가 에이전틱 설계의 뼈대입니다.</div>
+    <div class="footer"><div class="page">56 / 80</div></div>
+  </section>
+
+  <!-- ════════════════════════════════════════════════════════════
+       CHAPTER 03.5 — 에이전틱 실행편
+       ════════════════════════════════════════════════════════════ -->
+
+  <!-- CHAPTER 04 OPENER -->
+  <section class="slide s-title" data-label="Chapter 4 Opener">
+    <div class="glow" style="background:transparent;"></div>
+    <div class="brandmark">
+      <div class="logo" style="background:transparent;">AI</div>
+      <div>Chapter 3.5 · of 04</div>
+    </div>
+    <div>
+      <div class="big">에이전틱<br>실행편.</div>
+      <div class="sub">AI 드림팀, 실제로 세팅하는 법.<br>코드 없이 구조만 이해하면, Claude Code로 직접 만들 수 있습니다.</div>
+    </div>
+    <div class="footer"><div class="page">57 / 80</div></div>
+  </section>
+
+  <!-- Ch.4 TOC -->
+  <section class="slide" data-label="Ch4 TOC">
+    <div class="eyebrow amber">챕터 3.5 — 이번 챕터</div>
+    <div class="title" style="margin-top:20px;">이렇게 흘러갑니다.</div>
+    <div style="flex:1;display:flex;flex-direction:column;justify-content:center;gap:0;margin-top:36px;">
+      <div style="display:flex;gap:40px;align-items:baseline;padding:28px 0;border-top:1px solid rgba(255,255,255,0.08);">
+        <div style="font-family:var(--font-mono);font-size:24px;color:var(--accent-amber);min-width:48px;">01</div>
+        <div style="font-size:34px;font-weight:600;min-width:380px;word-break:keep-all;">준비물 선택</div>
+        <div style="font-size:26px;color:var(--text-secondary);word-break:keep-all;">무엇을 설치할 것인가</div>
+      </div>
+      <div style="display:flex;gap:40px;align-items:baseline;padding:28px 0;border-top:1px solid rgba(255,255,255,0.08);">
+        <div style="font-family:var(--font-mono);font-size:24px;color:var(--accent-amber);min-width:48px;">02</div>
+        <div style="font-size:34px;font-weight:600;min-width:380px;word-break:keep-all;">설치와 세팅</div>
+        <div style="font-size:26px;color:var(--text-secondary);word-break:keep-all;">올바른 초기 설정</div>
+      </div>
+      <div style="display:flex;gap:40px;align-items:baseline;padding:28px 0;border-top:1px solid rgba(255,255,255,0.08);">
+        <div style="font-family:var(--font-mono);font-size:24px;color:var(--accent-amber);min-width:48px;">03</div>
+        <div style="font-size:34px;font-weight:600;min-width:380px;word-break:keep-all;">전체 구조</div>
+        <div style="font-size:26px;color:var(--text-secondary);word-break:keep-all;">파일과 폴더 역할</div>
+      </div>
+      <div style="display:flex;gap:40px;align-items:baseline;padding:28px 0;border-top:1px solid rgba(255,255,255,0.08);border-bottom:1px solid rgba(255,255,255,0.08);">
+        <div style="font-family:var(--font-mono);font-size:24px;color:var(--accent-amber);min-width:48px;">04</div>
+        <div style="font-size:34px;font-weight:600;min-width:380px;word-break:keep-all;">실행과 운용</div>
+        <div style="font-size:26px;color:var(--text-secondary);word-break:keep-all;">첫 에이전트 실행</div>
+      </div>
+    </div>
+    <div class="footer"><div class="page">58 / 80</div></div>
+  </section>
+
+  <!-- 준비물 — Claude Code 단독 -->
+  <section class="slide" data-label="준비물">
+    <div class="eyebrow">실습 준비물</div>
+    <div class="title" style="margin-top:20px;max-width:1600px;">오늘은, Claude Code 하나.</div>
+    <div class="caption" style="margin-top:14px;max-width:1500px;">Anthropic 공식 AI 코딩 에이전트. 설치는 명령어 한 줄, 로그인은 평소 쓰던 Claude 계정이면 됩니다.</div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:48px;margin-top:40px;flex:1;align-items:stretch;">
+      <!-- 설치 -->
+      <div style="background:var(--bg-surface);border-radius:18px;padding:44px 48px;display:flex;flex-direction:column;">
+        <div class="eyebrow" style="margin-bottom:18px;">설치</div>
+        <div class="subsection" style="font-size:40px;font-weight:700;margin-bottom:20px;">명령어 한 줄이면 끝</div>
+        <div style="background:rgba(0,0,0,0.32);border-radius:16px;padding:24px 28px;font-size:24px;line-height:1.8;margin-bottom:20px;">
+          <div style="color:var(--text-tertiary);margin-bottom:6px;">Windows · PowerShell</div>
+          <div style="font-family:var(--font-mono);color:var(--accent);">irm https://claude.ai/install.ps1 | iex</div>
+          <div style="color:var(--text-tertiary);margin:14px 0 6px;">macOS · Linux</div>
+          <div style="font-family:var(--font-mono);color:var(--accent);">curl -fsSL https://claude.ai/install.sh | bash</div>
+        </div>
+        <div style="margin-top:auto;font-size:24px;color:var(--text-secondary);line-height:1.6;"><b style="color:#fff;">Node.js 설치 필요 없음</b> — 네이티브 설치기가 알아서 깔립니다.</div>
+      </div>
+      <!-- 로그인 & 비용 -->
+      <div style="background:var(--bg-surface);border-radius:18px;padding:44px 48px;display:flex;flex-direction:column;">
+        <div class="eyebrow" style="margin-bottom:18px;">로그인 · 비용</div>
+        <div class="subsection" style="font-size:40px;font-weight:700;margin-bottom:20px;">평소 쓰던 Claude 계정</div>
+        <div style="background:rgba(0,0,0,0.32);border-radius:16px;padding:24px 28px;font-size:24px;line-height:1.8;margin-bottom:20px;">
+          <div style="color:var(--text-tertiary);margin-bottom:6px;">터미널에서</div>
+          <div><span style="font-family:var(--font-mono);color:var(--accent);">claude</span> 입력 후 브라우저 로그인</div>
+          <div style="color:var(--text-tertiary);margin:14px 0 6px;">요금제 (모두 Claude Code 포함)</div>
+          <div>Pro $20/월 · Max $100~$200/월</div>
+        </div>
+        <div style="margin-top:auto;font-size:24px;color:var(--text-secondary);line-height:1.6;">구독엔 <b style="color:#fff;">사용량 한도</b>가 있습니다 — 많이 굴리면 한도에 걸리고, 회사 도입은 Team/Enterprise로 따로.</div>
+      </div>
+    </div>
+    <div class="footer"><div class="page">59 / 80</div></div>
+  </section>
+
+  <!-- 준비물 압축 — Claude Code -->
+  <section class="slide" data-label="Claude Code Prerequisites">
+    <div class="eyebrow">PRE-FLIGHT</div>
+    <div class="title" style="margin-top:20px;max-width:1600px;">오늘 준비물, 한 가지면 됩니다.</div>
+    <div class="habits" style="margin-top:52px;">
+      <div class="habit">
+        <div class="hnum" style="color:var(--accent);">01</div>
+        <div class="hbody">
+          <div class="htitle">Claude Code 설치 + 로그인 확인</div>
+          <div class="hdesc">강의 전에 안내드린 대로 설치 명령어 한 줄 실행하고, 터미널에 <span style="font-family:var(--font-mono);color:var(--accent);">claude</span> 쳐서 로그인까지. 이미 됐다면 바로 다음.</div>
+        </div>
+      </div>
+      <div class="habit">
+        <div class="hnum" style="color:var(--accent);">02</div>
+        <div class="hbody">
+          <div class="htitle">나머지는 에이전트가 챙깁니다</div>
+          <div class="hdesc">실습 중 뭔가 더 필요하면 터미널에 <b style="color:#fff;">"이거 설치할까요?"</b> 하고 물어봅니다. 엔터 한 번이면 알아서 설치 — 관리자 비밀번호만 직접 입력.</div>
+        </div>
+      </div>
+      <div class="habit">
+        <div class="hnum" style="color:var(--accent);">03</div>
+        <div class="hbody">
+          <div class="htitle">Python · Git 은 오늘 불필요</div>
+          <div class="hdesc">고급 기능 쓸 때나 필요합니다. 오늘 카드뉴스 실습엔 안 건드립니다. <b style="color:#fff;">미리 깔지 마세요</b> — 어설프게 손대면 환경변수만 꼬입니다.</div>
+        </div>
+      </div>
+    </div>
+    <div class="footer"><div class="page">60 / 80</div></div>
+  </section>
+
+  <!-- 로그인 및 권한 설정 — Claude Code -->
+  <section class="slide" data-label="Claude Code Setup">
+    <div class="eyebrow">SETUP &amp; PERMISSIONS</div>
+    <div class="title" style="margin-top:20px;max-width:1600px;">AI에게 '열쇠'를 넘겨주는 과정.</div>
+    <div style="flex:1;display:flex;flex-direction:column;justify-content:flex-start;margin-top:28px;gap:28px;">
+      <div style="display:grid;grid-template-columns:260px 1fr 1fr;gap:0;border:1px solid rgba(255,255,255,0.12);border-radius:24px;overflow:hidden;">
+        <div style="padding:20px 32px;background:var(--bg-elevated);font-size:24px;font-weight:600;color:var(--accent);letter-spacing:0.08em;text-transform:uppercase;border-bottom:1px solid rgba(255,255,255,0.08);">단계</div>
+        <div style="padding:20px 32px;background:var(--bg-elevated);font-size:24px;font-weight:600;color:var(--accent);letter-spacing:0.08em;text-transform:uppercase;border-bottom:1px solid rgba(255,255,255,0.08);border-left:1px solid rgba(255,255,255,0.08);">설정 항목</div>
+        <div style="padding:20px 32px;background:var(--bg-elevated);font-size:24px;font-weight:600;color:var(--text-secondary);letter-spacing:0.08em;text-transform:uppercase;border-bottom:1px solid rgba(255,255,255,0.08);border-left:1px solid rgba(255,255,255,0.08);">권장 값</div>
+        <div style="padding:20px 32px;font-size:28px;border-bottom:1px solid rgba(255,255,255,0.06);">1 — 로그인</div>
+        <div style="padding:20px 32px;font-size:28px;border-bottom:1px solid rgba(255,255,255,0.06);border-left:1px solid rgba(255,255,255,0.06);">인증 방식</div>
+        <div style="padding:20px 32px;font-size:28px;border-bottom:1px solid rgba(255,255,255,0.06);border-left:1px solid rgba(255,255,255,0.06);"><span style="font-family:var(--font-mono);">claude</span> 입력 후 계정 로그인</div>
+        <div style="padding:20px 32px;font-size:28px;border-bottom:1px solid rgba(255,255,255,0.06);">2 — 작업 폴더</div>
+        <div style="padding:20px 32px;font-size:28px;border-bottom:1px solid rgba(255,255,255,0.06);border-left:1px solid rgba(255,255,255,0.06);">프로젝트 열기</div>
+        <div style="padding:20px 32px;font-size:28px;border-bottom:1px solid rgba(255,255,255,0.06);border-left:1px solid rgba(255,255,255,0.06);">빈 폴더에서 <span style="font-family:var(--font-mono);">claude</span> 실행</div>
+        <div style="padding:20px 32px;font-size:28px;border-bottom:1px solid rgba(255,255,255,0.06);">3 — 권한 모드</div>
+        <div style="padding:20px 32px;font-size:28px;border-bottom:1px solid rgba(255,255,255,0.06);border-left:1px solid rgba(255,255,255,0.06);">파일 편집·명령 승인</div>
+        <div style="padding:20px 32px;font-size:28px;border-bottom:1px solid rgba(255,255,255,0.06);border-left:1px solid rgba(255,255,255,0.06);"><b style="color:var(--accent);">기본(매번 확인)</b> <span style="color:var(--text-tertiary);">· Shift+Tab으로 조절</span></div>
+        <div style="padding:20px 32px;font-size:28px;">4 — 큰 작업</div>
+        <div style="padding:20px 32px;font-size:28px;border-left:1px solid rgba(255,255,255,0.06);">계획 먼저 보기</div>
+        <div style="padding:20px 32px;font-size:28px;border-left:1px solid rgba(255,255,255,0.06);">Plan 모드 <span style="color:var(--text-tertiary);">(실행 전 미리보기)</span></div>
+      </div>
+      <div class="bullets">
+        <div class="bullet"><div class="idx">→</div><div class="txt"><b>권한 모드</b> <span>— 파일·명령 실행 전 매번 확인. 익숙해지면 Shift+Tab으로 '자동 승인'까지.</span></div></div>
+        <div class="bullet"><div class="idx">→</div><div class="txt"><b>Plan 모드</b> <span>— 큰 작업은 <b style="color:#fff;">계획만</b> 먼저 보여주고, OK 하면 실행. 사고 방지 안전벨트.</span></div></div>
+      </div>
+    </div>
+    <div class="footer"><div class="page">61 / 80</div></div>
+  </section>
+
+  <!-- 더 편하게 쓰는 꿀팁 — Claude Code -->
+  <section class="slide" data-label="Claude Code Tips">
+    <div class="eyebrow">PRO TIPS</div>
+    <div class="title" style="margin-top:20px;max-width:1600px;">손에 익으면 빨라지는<br>세 가지.</div>
+    <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:32px;margin-top:52px;flex:1;">
+      <div style="background:var(--bg-surface);border-radius:18px;padding:40px 44px;display:flex;flex-direction:column;gap:16px;">
+        <div style="font-size:28px;font-weight:700;font-family:var(--font-mono);color:var(--accent);">/init</div>
+        <div style="font-size:28px;color:var(--text-secondary);line-height:1.65;word-break:keep-all;">프로젝트 폴더에서 한 번 실행하면 <b style="color:#fff;">CLAUDE.md</b> 초안을 만들어 줍니다. 회사·스타일·규칙을 적어두면 매번 자동으로 읽습니다.</div>
+      </div>
+      <div style="background:var(--bg-surface);border-radius:18px;padding:40px 44px;display:flex;flex-direction:column;gap:16px;">
+        <div style="font-size:28px;font-weight:700;color:var(--text-primary);">역할 · 매뉴얼 파일</div>
+        <div style="font-size:28px;color:var(--text-secondary);line-height:1.65;word-break:keep-all;"><span style="font-family:var(--font-mono);">.claude/agents</span> 와 <span style="font-family:var(--font-mono);">.claude/skills</span> 폴더에 역할·업무 매뉴얼을 두면, 필요할 때 <b style="color:#fff;">알아서 호출</b>합니다.</div>
+      </div>
+      <div style="background:var(--bg-surface);border-radius:18px;padding:40px 44px;display:flex;flex-direction:column;gap:16px;">
+        <div style="font-size:28px;font-weight:700;color:var(--text-primary);">권한 · 안전</div>
+        <div style="font-size:28px;color:var(--text-secondary);line-height:1.65;word-break:keep-all;">큰 작업은 <b style="color:#fff;">Plan 모드</b>로 먼저 보고 승인 후 실행. <span style="font-family:var(--font-mono);">.git</span> · <span style="font-family:var(--font-mono);">.env</span> 같은 민감 파일은 기본 보호됩니다.</div>
+      </div>
+    </div>
+    <div class="footer"><div class="page">62 / 80</div></div>
+  </section>
+
+  <!-- ════════════════════════════════════════════════════════════
+       HANDS-ON PRACTICE — Claude Code 에이전트 만들기 (30분)
+       ════════════════════════════════════════════════════════════ -->
+
+  <!-- 실습-01 — Act 1: 문제 제기 -->
+  <section class="slide" data-label="Act 1 Problem">
+    <div class="eyebrow amber">HANDS-ON PRACTICE</div>
+    <div class="title" style="margin-top:20px;max-width:1500px;">AI 도구를 쓰는 것 vs AI 시스템을 만드는 것</div>
+    <div class="ba" style="margin-top:40px;flex:none;">
+      <div class="ba-col">
+        <div class="tag">지금 대부분의 방식</div>
+        <div class="flow" style="margin-top:28px;">
+          <div class="node">검색</div>
+          <div class="edge" style="height:44px;"><span class="lbl">복붙 · 사람</span></div>
+          <div class="node">요약</div>
+          <div class="edge" style="height:44px;"><span class="lbl">복붙 · 사람</span></div>
+          <div class="node">디자인</div>
+          <div class="edge" style="height:44px;"><span class="lbl">복붙 · 사람</span></div>
+          <div class="node">저장</div>
+        </div>
+      </div>
+      <div class="ba-col" style="background:var(--bg-surface);border:1px solid rgba(255,255,255,0.25);">
+        <div class="tag" style="color:var(--accent-amber);">오늘 만들 것</div>
+        <div class="flow" style="margin-top:28px;">
+          <div class="node lead">주제 한 줄 입력</div>
+          <div class="edge"></div>
+          <div class="node" style="padding:26px 40px;">검색 + 요약 + 카드 생성 + PNG 저장<br><b style="color:#fff;font-size:40px;">자동 실행</b></div>
+        </div>
+      </div>
+    </div>
+    <div class="caption" style="margin-top:20px;">그 차이를 만드는 게 뭘까요?</div>
+    <div class="footer"><div class="page">63 / 80</div></div>
+  </section>
+
+  <!-- 실습-02 — Act 1.5: 에이전틱 AI = 워크플로우 -->
+  <section class="slide" data-label="Act 1.5 Agentic">
+    <div class="eyebrow amber">에이전틱 AI</div>
+    <div class="title" style="margin-top:20px;max-width:1500px;">지시 한 줄에 여러 단계를<br>스스로 이어서 실행하는 <span style="color:var(--accent-amber);">AI</span>.</div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:48px;margin-top:32px;flex:none;">
+      <div style="background:var(--bg-surface);border-radius:20px;padding:36px 44px;display:flex;flex-direction:column;">
+        <div class="eyebrow" style="margin-bottom:24px;">일반 AI 사용</div>
+        <div class="flow">
+          <div class="row"><div class="node" style="padding:14px 38px;">질문</div><div class="hedge"></div><div class="node" style="padding:14px 38px;">답</div></div>
+          <div class="edge" style="height:56px;"><span class="lbl">사람 판단</span></div>
+          <div class="row"><div class="node" style="padding:14px 38px;">질문</div><div class="hedge"></div><div class="node" style="padding:14px 38px;">답</div></div>
+          <div class="edge" style="height:56px;"><span class="lbl">사람 판단</span></div>
+          <div class="caption" style="color:var(--text-tertiary);">반복…</div>
+        </div>
+        <div style="margin-top:18px;padding-top:16px;border-top:1px solid rgba(255,255,255,0.08);font-size:24px;color:var(--text-secondary);line-height:1.55;">예) "경쟁사 찾아줘" → 받고 → 내가 "정리해줘" → 또 시키고…<br><b style="color:#fff;">매 단계 내가 운전합니다.</b></div>
+      </div>
+      <div style="background:var(--bg-surface);border:1px solid rgba(255,255,255,0.4);border-radius:20px;padding:36px 44px;display:flex;flex-direction:column;">
+        <div class="eyebrow" style="color:var(--accent-amber);margin-bottom:24px;">에이전틱 AI</div>
+        <div class="flow">
+          <div class="node lead" style="padding:14px 38px;">지시 한 줄</div>
+          <div class="edge" style="height:38px;"></div>
+          <div class="row">
+            <div class="node" style="min-width:118px;padding:14px 20px;font-size:26px;">검색</div><div class="hedge"></div>
+            <div class="node" style="min-width:118px;padding:14px 20px;font-size:26px;">판단</div><div class="hedge"></div>
+            <div class="node" style="min-width:118px;padding:14px 20px;font-size:26px;">생성</div><div class="hedge"></div>
+            <div class="node" style="min-width:118px;padding:14px 20px;font-size:26px;">변환</div>
+          </div>
+          <div class="edge" style="height:38px;"></div>
+          <div class="node lead" style="padding:14px 38px;">결과물</div>
+        </div>
+        <div style="margin-top:18px;padding-top:16px;border-top:1px solid rgba(255,255,255,0.08);font-size:24px;color:var(--text-secondary);line-height:1.55;">예) "경쟁사 3곳 분석해 보고서 써줘" → 검색·정리·작성까지<br><b style="color:#fff;">한 번에 알아서 끝까지.</b></div>
+      </div>
+    </div>
+    <div class="caption" style="margin-top:16px;">워크플로우 = 에이전틱 AI의 실체. 오늘 만드는 <span style="font-family:var(--font-mono);">.md</span> 파일이 그 설계도입니다.</div>
+    <div class="footer"><div class="page">64 / 80</div></div>
+  </section>
+
+  <!-- 신규 — 이론 ↔ 실습 매핑 -->
+  <section class="slide" data-label="Concept to File Map">
+    <div class="eyebrow amber">다리 놓기</div>
+    <div class="title" style="margin-top:24px;">지금까지 배운 것이,<br>어디에 들어가나.</div>
+    <div class="caption" style="margin-top:16px;max-width:1600px;">앞으로 나올 .md 파일 세 개가 갑자기 튀어나오는 게 아닙니다 — 1·2·3편에서 이미 다 배운 내용입니다.</div>
+    <div class="recipe" style="grid-template-columns:repeat(3,1fr);margin-top:40px;">
+      <div class="card">
+        <div class="cnum" style="color:var(--accent-amber);">Ch.01 — 4 재료</div>
+        <div class="ctitle">역할·맥락·형식·제약</div>
+        <div class="csub">이 AI가 누구이고 어떻게 말하는지.</div>
+        <div class="ex">
+          <span class="yes" style="color:var(--accent-amber);font-family:var(--font-mono);">→ .claude/agents/</span>
+        </div>
+      </div>
+      <div class="card">
+        <div class="cnum" style="color:var(--accent-amber);">Ch.02 — 3 컨텍스트</div>
+        <div class="ctitle">회사·스타일·히스토리</div>
+        <div class="csub">회사 전체에 늘 적용되는 정보.</div>
+        <div class="ex">
+          <span class="yes" style="color:var(--accent-amber);font-family:var(--font-mono);">→ CLAUDE.md</span>
+        </div>
+      </div>
+      <div class="card">
+        <div class="cnum" style="color:var(--accent-amber);">Ch.03 — 워크플로우</div>
+        <div class="ctitle">단계·체크포인트·결과물</div>
+        <div class="csub">실제로 일을 어떤 순서로 하는지.</div>
+        <div class="ex">
+          <span class="yes" style="color:var(--accent-amber);font-family:var(--font-mono);">→ .claude/skills/</span>
+        </div>
+      </div>
+    </div>
+    <div class="caption" style="margin-top:32px;">이 매핑만 머리에 들어오면, 다음 슬라이드에서 .md 파일이 갑자기 나와도 안 헷갈립니다.</div>
+    <div class="footer"><div class="page">65 / 80</div></div>
+  </section>
+
+  <!-- 실습-03 — Act 2: 설계도 3개 파일 -->
+  <section class="slide" data-label="Act 2 Files">
+    <div class="eyebrow purple">워크플로우 설계도</div>
+    <div class="title" style="margin-top:20px;">3개 파일로 만든다.</div>
+    <div style="display:grid;grid-template-columns:1fr 400px;gap:80px;margin-top:52px;flex:1;align-items:center;">
+      <div style="display:flex;flex-direction:column;align-items:stretch;gap:0;">
+        <div style="background:rgba(255,255,255,0.12);border:1px solid rgba(255,255,255,0.4);border-radius:24px;padding:32px 44px;">
+          <div style="font-family:var(--font-mono);font-size:24px;color:var(--accent);font-weight:600;letter-spacing:0.08em;margin-bottom:12px;">CLAUDE.md</div>
+          <div class="subsection">총괄 지침서</div>
+          <div class="body-sec" style="margin-top:8px;">늘 먼저 읽는다 · 어떤 순서로 일할지 결정</div>
+        </div>
+        <div style="display:flex;justify-content:center;padding:12px 0;">
+          <div style="display:flex;flex-direction:column;align-items:center;gap:4px;">
+            <div style="width:2px;height:20px;background:rgba(255,255,255,0.15);"></div>
+            <div style="font-size:24px;color:var(--text-tertiary);letter-spacing:0.06em;">↓ &nbsp;참조</div>
+            <div style="width:2px;height:20px;background:rgba(255,255,255,0.15);"></div>
+          </div>
+        </div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:24px;">
+          <div style="background:var(--bg-surface);border-radius:24px;padding:32px 36px;">
+            <div style="font-family:var(--font-mono);font-size:24px;color:var(--text-secondary);font-weight:600;letter-spacing:0.02em;margin-bottom:12px;">.claude/agents/</div>
+            <div class="subsection">역할 정의</div>
+            <div class="body-sec" style="margin-top:8px;">이 AI가 어떤 사람인지</div>
+          </div>
+          <div style="background:var(--bg-surface);border-radius:24px;padding:32px 36px;">
+            <div style="font-family:var(--font-mono);font-size:24px;color:var(--text-secondary);font-weight:600;letter-spacing:0.02em;margin-bottom:12px;">.claude/skills/</div>
+            <div class="subsection">수행 방식</div>
+            <div class="body-sec" style="margin-top:8px;">어떻게 일할지를 정의</div>
+          </div>
+        </div>
+      </div>
+      <div style="display:flex;flex-direction:column;gap:32px;">
+        <div class="section-h">사용자는 무엇을<br>할지만 결정한다.</div>
+        <div class="body-sec">나머지는 설계도가 책임진다.</div>
+        <div style="background:var(--bg-elevated);border-radius:20px;padding:24px 32px;">
+          <div class="caption" style="color:var(--text-secondary);">복잡해 보이지만 실제로는 메모장 3개입니다.</div>
+        </div>
+      </div>
+    </div>
+    <div class="footer"><div class="page">66 / 80</div></div>
+  </section>
+
+  <!-- 실습-04 — Act 3: Claude Code 인터페이스 투어 -->
+  <section class="slide" data-label="Act 3 Tour">
+    <div class="eyebrow">CLAUDE CODE</div>
+    <div class="title" style="margin-top:20px;max-width:1600px;">화면은 딱 세 가지면 됩니다</div>
+    <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:32px;margin-top:52px;flex:1;">
+      <div style="background:var(--bg-surface);border-radius:20px;padding:48px 44px;display:flex;flex-direction:column;gap:16px;">
+        <div class="subsection">작업 폴더</div>
+        <div class="caption" style="color:var(--text-tertiary);font-family:var(--font-mono);letter-spacing:0.08em;">PROJECT FOLDER</div>
+        <div class="body-sec" style="margin-top:8px;word-break:keep-all;">설계도들이 사는 곳. <b style="color:#fff;">CLAUDE.md · .claude/agents · .claude/skills</b>가 여기 쌓입니다.</div>
+      </div>
+      <div style="background:var(--bg-surface);border-radius:20px;padding:48px 44px;display:flex;flex-direction:column;gap:16px;">
+        <div class="subsection">지시창</div>
+        <div class="caption" style="color:var(--text-tertiary);font-family:var(--font-mono);letter-spacing:0.08em;">PROMPT</div>
+        <div class="body-sec" style="margin-top:8px;word-break:keep-all;">에이전트에게 <b style="color:#fff;">지시를 내리는 곳</b>. 터미널에 한국어로 한 마디면 됩니다.</div>
+      </div>
+      <div style="background:var(--bg-surface);border-radius:20px;padding:48px 44px;display:flex;flex-direction:column;gap:16px;">
+        <div class="subsection">승인창</div>
+        <div class="caption" style="color:var(--text-tertiary);font-family:var(--font-mono);letter-spacing:0.08em;">TOOL APPROVAL</div>
+        <div class="body-sec" style="margin-top:8px;word-break:keep-all;">고치기 전에 <b style="color:#fff;">먼저 보여주는 곳</b>. 당신이 OK 해야 실제로 실행됩니다.</div>
+      </div>
+    </div>
+    <div class="caption" style="margin-top:28px;">폴더에 설계도, 한 마디 지시, 매 단계 당신이 승인 — 그게 전부입니다.</div>
+    <div class="footer"><div class="page">67 / 80</div></div>
+  </section>
+
+  <!-- 실습-05 — Act 4: 환경 세팅 -->
+  <section class="slide" data-label="Act 4 Setup">
+    <div class="eyebrow amber">실습 1</div>
+    <div class="title" style="margin-top:20px;">받기 → 끌기 → 끝.</div>
+    <div style="display:flex;flex-direction:column;gap:0;margin-top:44px;max-width:1500px;">
+      <div style="display:flex;gap:32px;align-items:flex-start;padding:26px 0;border-top:1px solid rgba(255,255,255,0.08);">
+        <div style="font-family:var(--font-mono);font-size:28px;color:var(--accent-amber);font-weight:600;min-width:32px;padding-top:4px;">01</div>
+        <div>
+          <div class="body">노션 링크 열기</div>
+          <div class="caption" style="color:var(--text-secondary);margin-top:6px;">강사가 미리 올려둔 <span style="font-family:var(--font-mono);">.md</span> 파일 페이지</div>
+        </div>
+      </div>
+      <div style="display:flex;gap:32px;align-items:flex-start;padding:26px 0;border-top:1px solid rgba(255,255,255,0.08);">
+        <div style="font-family:var(--font-mono);font-size:28px;color:var(--accent-amber);font-weight:600;min-width:32px;padding-top:4px;">02</div>
+        <div>
+          <div class="body">두 파일 다운로드</div>
+          <div class="caption" style="color:var(--text-secondary);margin-top:6px;"><span style="font-family:var(--font-mono);">CLAUDE.md · SKILL.md</span></div>
+        </div>
+      </div>
+      <div style="display:flex;gap:32px;align-items:flex-start;padding:26px 0;border-top:1px solid rgba(255,255,255,0.08);border-bottom:1px solid rgba(255,255,255,0.08);">
+        <div style="font-family:var(--font-mono);font-size:28px;color:var(--accent-amber);font-weight:600;min-width:32px;padding-top:4px;">03</div>
+        <div>
+          <div class="body">작업 폴더에 넣기</div>
+          <div class="caption" style="color:var(--text-secondary);margin-top:6px;">Claude Code를 띄운 폴더에 끌어다 놓으면 — 끝.</div>
+        </div>
+      </div>
+    </div>
+    <div style="margin-top:auto;padding-top:40px;text-align:center;">
+      <div style="font-size:28px;color:var(--text-secondary);line-height:1.5;">오늘은 <span style="font-family:var(--font-mono);">.md</span> 를 직접 만들지 않습니다 — 받아서 끌어다 놓고, <b style="color:#fff;">작동하는 모습을 봅니다.</b></div>
+    </div>
+    <div class="footer"><div class="page">68 / 80</div></div>
+  </section>
+
+  <!-- 실습-06 — Act 5: 두 파일이 하는 일 -->
+  <section class="slide" data-label="Act 5 CardNews">
+    <div class="eyebrow cyan">실습 2</div>
+    <div class="title" style="margin-top:20px;">방금 끌어다 놓은 두 파일이<br>이걸 합니다.</div>
+    <div class="steps" style="margin-top:44px;">
+      <div class="step">
+        <div class="snum" style="color:var(--accent-cyan);">01</div>
+        <div class="sdiv"></div>
+        <div class="stitle">뉴스 검색</div>
+        <div class="sdesc">주제 1줄 입력 → 웹 검색 자동 실행. 핵심사실 / 수치·배경 / 의미·영향 3컬럼으로 정리.</div>
+      </div>
+      <div class="step">
+        <div class="snum" style="color:var(--accent-cyan);">02</div>
+        <div class="sdiv"></div>
+        <div class="stitle">카드 구성안 제안</div>
+        <div class="sdesc">리서치 결과를 바탕으로 카드 구성안 제안. 사용자 승인 후 다음 단계 진행.</div>
+      </div>
+      <div class="step">
+        <div class="snum" style="color:var(--accent-cyan);">03</div>
+        <div class="sdiv"></div>
+        <div class="stitle">HTML 생성<br>→ PNG 저장</div>
+        <div class="sdesc">카드별 HTML 생성 → PNG 변환 → 폴더 자동 저장. card_01.png ~</div>
+      </div>
+    </div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:48px;margin-top:36px;">
+      <div style="background:var(--bg-surface);border-radius:24px;padding:28px 36px;">
+        <div style="font-family:var(--font-mono);font-size:24px;color:var(--accent);font-weight:600;letter-spacing:0.08em;margin-bottom:8px;">SKILL.md</div>
+        <div class="body-sec" style="margin-top:0;">위 3단계 워크플로우의 디자인·실행 룰</div>
+      </div>
+      <div style="background:var(--bg-surface);border-radius:24px;padding:28px 36px;">
+        <div style="font-family:var(--font-mono);font-size:24px;color:var(--accent);font-weight:600;letter-spacing:0.08em;margin-bottom:8px;">CLAUDE.md</div>
+        <div class="body-sec" style="margin-top:0;">언제·어떻게 돌릴지 총괄하는 지침서</div>
+      </div>
+    </div>
+    <div class="caption" style="margin-top:24px;">안에 뭐가 적혀있는지 지금 읽을 필요 없습니다. <b style="color:#fff;">에이전트가 읽습니다.</b></div>
+    <div class="footer"><div class="page">69 / 80</div></div>
+  </section>
+
+  <!-- 실습-07 — Act 6: 실행 + 관찰 -->
+  <section class="slide" data-label="Act 6 Execute">
+    <div class="eyebrow amber">실행 + 관찰</div>
+    <div class="title" style="margin-top:20px;">지시 한 줄, 워크플로우가 시작된다.</div>
+    <div style="margin-top:36px;background:var(--bg-surface);border-radius:24px;padding:36px 56px;">
+      <div style="font-size:40px;color:var(--accent-amber);font-weight:600;letter-spacing:-0.01em;line-height:1.35;"><span style="color:var(--text-tertiary);font-weight:400;">&ldquo;</span>이번 주 AI 업계 동향으로 카드뉴스 만들어줘<span style="color:var(--text-tertiary);font-weight:400;">&rdquo;</span></div>
+    </div>
+    <div class="steps" style="margin-top:40px;">
+      <div class="step">
+        <div class="snum" style="color:var(--accent-amber);">01</div>
+        <div class="sdiv"></div>
+        <div class="stitle">실시간 웹 검색 실행</div>
+        <div class="sdesc">에이전트가 자동으로 최신 뉴스를 수집합니다.</div>
+      </div>
+      <div class="step">
+        <div class="snum" style="color:var(--accent-amber);">02</div>
+        <div class="sdiv"></div>
+        <div class="stitle">리서치 결과 표 출력</div>
+        <div class="sdesc">핵심사실 / 수치·배경 / 의미·영향 3컬럼 정리.</div>
+      </div>
+      <div class="step">
+        <div class="snum" style="color:var(--accent-amber);">03</div>
+        <div class="sdiv"></div>
+        <div class="stitle">HTML + PNG 자동 생성</div>
+        <div class="sdesc">폴더에 card_01.png ~ card_N.png 파일이 쌓입니다.</div>
+      </div>
+    </div>
+    <div class="body-sec" style="margin-top:32px;">에이전트가 작동하는 동안 여러분은 아무것도 하지 않아도 됩니다 — <b style="color:#fff;">이 공백이 여러분이 다른 일을 하는 시간입니다.</b></div>
+    <div class="footer"><div class="page">70 / 80</div></div>
+  </section>
+
+  <!-- 실습-08 — Act 7: 클로징 -->
+  <section class="slide" data-label="Act 7 Close">
+    <div class="eyebrow purple">CLOSING</div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:80px;margin-top:36px;flex:1;align-items:center;">
+      <div>
+        <div class="title-lg" style="line-height:1.15;">오늘 만든 파일,<br>내일 그대로 쓰세요.</div>
+        <div class="body-sec" style="margin-top:48px;line-height:1.7;">AI를 쓰는 사람과 AI로 시스템을 만드는 사람 —<br><b style="color:#fff;">그 차이는 .md 파일 몇 개입니다.</b></div>
+      </div>
+      <div style="display:flex;flex-direction:column;gap:0;">
+        <div style="display:flex;gap:32px;align-items:flex-start;padding:28px 0;border-top:1px solid rgba(255,255,255,0.08);">
+          <div style="font-family:var(--font-mono);font-size:28px;color:var(--accent-purple);min-width:40px;flex-shrink:0;padding-top:4px;">01</div>
+          <div class="body">수정 필요 항목을 내 실제 업무로 채운다</div>
+        </div>
+        <div style="display:flex;gap:32px;align-items:flex-start;padding:28px 0;border-top:1px solid rgba(255,255,255,0.08);">
+          <div style="font-family:var(--font-mono);font-size:28px;color:var(--accent-purple);min-width:40px;flex-shrink:0;padding-top:4px;">02</div>
+          <div class="body">결과물이 마음에 안 들면 SKILL.md에 한 줄 추가한다</div>
+        </div>
+        <div style="display:flex;gap:32px;align-items:flex-start;padding:28px 0;border-top:1px solid rgba(255,255,255,0.08);border-bottom:1px solid rgba(255,255,255,0.08);">
+          <div style="font-family:var(--font-mono);font-size:28px;color:var(--accent-purple);min-width:40px;flex-shrink:0;padding-top:4px;">03</div>
+          <div class="body">새로운 워크플로우가 필요하면 스킬을 하나 더 만든다</div>
+        </div>
+      </div>
+    </div>
+    <div class="footer"><div class="page">71 / 80</div></div>
+  </section>
+
+  <!-- 59 — 전체 지도 (회사 비유 테이블) -->
+  <section class="slide" data-label="Full Map">
+    <div class="eyebrow amber">본격 도입할 때 만날 풍경</div>
+    <div class="title" style="margin-top:24px;max-width:1600px;">AI 팀 세팅 = 회사 세팅.</div>
+    <div class="caption" style="margin-top:14px;max-width:1600px;">오늘 실습에서 만든 구조가, 본격 도입 때도 그대로 커집니다 — 파일이 늘어날 뿐 원리는 같습니다.</div>
+    <div style="flex:1;display:flex;flex-direction:column;justify-content:center;margin-top:24px;">
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:0;border:1px solid rgba(255,255,255,0.12);border-radius:24px;overflow:hidden;">
+        <div style="padding:20px 36px;background:var(--bg-elevated);font-size:24px;font-weight:600;color:var(--accent-amber);letter-spacing:0.1em;text-transform:uppercase;border-bottom:1px solid rgba(255,255,255,0.08);">AI 세계</div>
+        <div style="padding:20px 36px;background:var(--bg-elevated);font-size:24px;font-weight:600;color:var(--text-secondary);letter-spacing:0.1em;text-transform:uppercase;border-bottom:1px solid rgba(255,255,255,0.08);">회사 세계</div>
+        <div style="padding:20px 36px;font-size:28px;font-family:var(--font-mono);color:var(--accent);border-bottom:1px solid rgba(255,255,255,0.06);">CLAUDE.md</div><div style="padding:20px 36px;font-size:28px;border-bottom:1px solid rgba(255,255,255,0.06);">취업규칙 + 회사 소개서</div>
+        <div style="padding:20px 36px;font-size:28px;font-family:var(--font-mono);color:var(--accent);border-bottom:1px solid rgba(255,255,255,0.06);">.claude/agents/</div><div style="padding:20px 36px;font-size:28px;border-bottom:1px solid rgba(255,255,255,0.06);">각 직원의 직무기술서 (JD)</div>
+        <div style="padding:20px 36px;font-size:28px;font-family:var(--font-mono);color:var(--accent);border-bottom:1px solid rgba(255,255,255,0.06);">.claude/skills/</div><div style="padding:20px 36px;font-size:28px;border-bottom:1px solid rgba(255,255,255,0.06);">업무 매뉴얼 (SOP)</div>
+        <div style="padding:20px 36px;font-size:28px;font-family:var(--font-mono);color:var(--accent);border-bottom:1px solid rgba(255,255,255,0.06);">.claude/settings.json</div><div style="padding:20px 36px;font-size:28px;border-bottom:1px solid rgba(255,255,255,0.06);">자동 잠금장치 · 강제 규칙</div>
+        <div style="padding:20px 36px;font-size:28px;font-family:var(--font-mono);color:var(--accent);border-bottom:1px solid rgba(255,255,255,0.06);">Subagents</div><div style="padding:20px 36px;font-size:28px;border-bottom:1px solid rgba(255,255,255,0.06);">병렬로 협업하는 팀</div>
+        <div style="padding:20px 36px;font-size:28px;font-family:var(--font-mono);color:var(--accent);">Claude Code</div><div style="padding:20px 36px;font-size:28px;">이 모든 걸 굴리는 회사 인프라</div>
+      </div>
+    </div>
+    <div class="footer"><div class="page">72 / 80</div></div>
+  </section>
+
+  <!-- 71 — 폴더 구조 -->
+  <section class="slide" data-label="Folder Structure">
+    <div class="eyebrow purple">폴더 구조 — 본격 도입 시의 사무실</div>
+    <div class="title" style="margin-top:16px;max-width:1600px;">폴더 구조가<br>조직도와 1:1 대응됩니다.</div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:56px;margin-top:36px;flex:1;align-items:center;">
+      <!-- 조직도 -->
+      <div style="display:flex;flex-direction:column;align-items:center;">
+        <div class="caption" style="color:var(--text-tertiary);letter-spacing:0.1em;text-transform:uppercase;font-weight:600;margin-bottom:24px;">조직도 관점</div>
+        <!-- 취업규칙 (CEO) -->
+        <div style="background:rgba(255,255,255,0.14);border:1.5px solid rgba(255,255,255,0.5);border-radius:16px;padding:24px 48px;text-align:center;">
+          <div style="font-family:var(--font-mono);font-size:24px;color:var(--accent);margin-bottom:8px;">CLAUDE.md</div>
+          <div style="font-size:28px;font-weight:700;">취업규칙</div>
+          <div style="font-size:24px;color:var(--text-secondary);margin-top:4px;">모든 에이전트 공통 적용</div>
+        </div>
+        <div style="width:2px;height:28px;background:rgba(255,255,255,0.18);"></div>
+        <div style="position:relative;width:100%;display:flex;justify-content:space-between;align-items:flex-start;">
+          <div style="position:absolute;top:0;left:15%;right:15%;height:2px;background:rgba(255,255,255,0.28);"></div>
+          <div style="width:30%;display:flex;flex-direction:column;align-items:center;">
+            <div style="width:2px;height:26px;background:rgba(255,255,255,0.18);"></div>
+            <div style="background:var(--bg-surface);border:1px solid rgba(255,255,255,0.08);border-radius:14px;padding:20px 12px;text-align:center;width:100%;">
+              <div style="font-family:var(--font-mono);font-size:24px;color:var(--text-secondary);margin-bottom:8px;">agents/</div>
+              <div style="font-size:24px;font-weight:600;line-height:1.2;">직원 JD</div>
+              <div style="font-size:24px;color:var(--text-tertiary);margin-top:4px;">역할 · 페르소나</div>
+            </div>
+          </div>
+          <div style="width:30%;display:flex;flex-direction:column;align-items:center;">
+            <div style="width:2px;height:26px;background:rgba(255,255,255,0.18);"></div>
+            <div style="background:var(--bg-surface);border:1px solid rgba(255,255,255,0.08);border-radius:14px;padding:20px 12px;text-align:center;width:100%;">
+              <div style="font-family:var(--font-mono);font-size:24px;color:var(--text-secondary);margin-bottom:8px;">skills/</div>
+              <div style="font-size:24px;font-weight:600;line-height:1.2;">업무 매뉴얼</div>
+              <div style="font-size:24px;color:var(--text-tertiary);margin-top:4px;">SOP 파일들</div>
+            </div>
+          </div>
+          <div style="width:30%;display:flex;flex-direction:column;align-items:center;">
+            <div style="width:2px;height:26px;background:rgba(255,255,255,0.18);"></div>
+            <div style="background:var(--bg-surface);border:1px solid rgba(255,255,255,0.08);border-radius:14px;padding:20px 12px;text-align:center;width:100%;">
+              <div style="font-family:var(--font-mono);font-size:24px;color:var(--text-secondary);margin-bottom:8px;">settings.json</div>
+              <div style="font-size:24px;font-weight:600;line-height:1.2;">잠금장치</div>
+              <div style="font-size:24px;color:var(--text-tertiary);margin-top:4px;">Hooks</div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <!-- 폴더 트리 -->
+      <div>
+        <div class="caption" style="color:var(--text-tertiary);letter-spacing:0.1em;text-transform:uppercase;font-weight:600;margin-bottom:24px;text-align:center;">폴더 구조 관점</div>
+        <div style="background:var(--bg-surface);border-radius:24px;padding:32px 44px;font-family:var(--font-mono);font-size:24px;line-height:1.7;color:var(--text-primary);">
+          <div style="font-family:var(--font-body);color:var(--text-tertiary);font-size:24px;margin-bottom:8px;">// Claude Code 프로젝트 폴더 구조</div>
+          <div style="color:var(--text-secondary);font-weight:600;">project/</div>
+          <div style="padding-left:32px;">├── <span style="color:var(--accent);font-weight:600;">CLAUDE.md</span><span style="font-family:var(--font-body);color:var(--text-tertiary);"> ← 취업규칙</span></div>
+          <div style="padding-left:32px;">└── <span style="color:var(--text-primary);">.claude/</span></div>
+          <div style="padding-left:64px;">├── <span style="color:var(--text-primary);">agents/</span><span style="font-family:var(--font-body);color:var(--text-tertiary);"> ← 직원 JD</span></div>
+          <div style="padding-left:96px;color:var(--text-secondary);">├── campaign-director.md</div>
+          <div style="padding-left:96px;color:var(--text-secondary);">└── copywriter.md</div>
+          <div style="padding-left:64px;">├── <span style="color:var(--text-primary);">skills/</span><span style="font-family:var(--font-body);color:var(--text-tertiary);"> ← 업무 매뉴얼</span></div>
+          <div style="padding-left:96px;color:var(--text-secondary);">├── copywriting/</div>
+          <div style="padding-left:96px;color:var(--text-secondary);">└── brand-guidelines/</div>
+          <div style="padding-left:64px;">└── <span style="color:var(--text-primary);">settings.json</span><span style="font-family:var(--font-body);color:var(--text-tertiary);"> ← 잠금장치</span></div>
+        </div>
+      </div>
+    </div>
+    <div class="footer"><div class="page">73 / 80</div></div>
+  </section>
+
+  <!-- 72 — 후반부 진입 디바이더 -->
+  <section class="slide s-divider" data-label="Take a Step Back">
+    <div class="eyebrow purple">한 발짝 떨어져서</div>
+    <div class="num" style="margin-top:24px;font-size:200px;color:var(--accent-purple);">조감도</div>
+    <div class="label" style="max-width:1500px;">실습은 끝났습니다.<br>이제 큰 그림을 한 번 봅니다.</div>
+    <div class="rule"></div>
+    <div class="footer"><div class="page">74 / 80</div></div>
+  </section>
+
+  <!-- 73 — 다음 단계의 풍경 (4-카드 티저) -->
+  <section class="slide" data-label="Next Steps Preview">
+    <div class="eyebrow purple">다음 단계의 풍경</div>
+    <div class="title" style="margin-top:20px;">이걸 알면, 한 발 더 멀리 갑니다.</div>
+    <div class="recipe" style="grid-template-columns:repeat(4,1fr);margin-top:52px;">
+      <div class="card">
+        <div style="position:absolute;top:0;left:0;right:0;height:4px;background:transparent;"></div>
+        <div class="cnum" style="color:var(--accent-purple);">01</div>
+        <div class="ctitle">Hooks</div>
+        <div class="csub">"이 파일은 건드리면 차단" — AI가 잊어도 강제 발동되는 자동 잠금장치.</div>
+      </div>
+      <div class="card">
+        <div style="position:absolute;top:0;left:0;right:0;height:4px;background:transparent;"></div>
+        <div class="cnum" style="color:var(--accent-purple);">02</div>
+        <div class="ctitle">Skills</div>
+        <div class="csub">매번 붙여넣기 vs 파일로 자동 로드. 반복 업무를 파일 한 장으로 공유.</div>
+      </div>
+      <div class="card">
+        <div style="position:absolute;top:0;left:0;right:0;height:4px;background:transparent;"></div>
+        <div class="cnum" style="color:var(--accent-purple);">03</div>
+        <div class="ctitle">Agent Teams</div>
+        <div class="csub">심부름꾼이냐 팀원이냐. 서로 직접 대화하는 멀티 에이전트 협업.</div>
+      </div>
+      <div class="card">
+        <div style="position:absolute;top:0;left:0;right:0;height:4px;background:transparent;"></div>
+        <div class="cnum" style="color:var(--accent-purple);">04</div>
+        <div class="ctitle">토큰 비용</div>
+        <div class="csub">병렬은 빠르지만 비용이 10~15배. 언제 어떻게 쓸지 판단이 필요.</div>
+      </div>
+    </div>
+    <div class="caption" style="margin-top:36px;">오늘은 입구만 봤습니다. 각각이 한 챕터씩 됩니다.</div>
+    <div class="footer"><div class="page">75 / 80</div></div>
+  </section>
+
+  <!-- 74 — 실제로 돌리는 순서 (구 76 보존) -->
+  <section class="slide" data-label="Running Order">
+    <div class="eyebrow amber">세팅 완료 후, 실제로 돌리면</div>
+    <div class="title" style="margin-top:24px;max-width:1600px;">내가 한 일은<br>첫 줄 지시 한 번.</div>
+    <div class="steps" style="margin-top:52px;">
+      <div class="step">
+        <div class="snum" style="color:var(--accent-amber);">01</div>
+        <div class="sdiv"></div>
+        <div class="stitle">CLAUDE.md<br>자동 로드</div>
+        <div class="sdesc">모든 에이전트가 회사·프로젝트 상황을 파악합니다.</div>
+      </div>
+      <div class="step">
+        <div class="snum" style="color:var(--accent-amber);">02</div>
+        <div class="sdiv"></div>
+        <div class="stitle">팀장 에이전트<br>소환</div>
+        <div class="sdesc"><span style="font-family:var(--font-mono);">.claude/agents</span> 읽고 태스크 리스트 생성, 팀원 병렬 소환.</div>
+      </div>
+      <div class="step">
+        <div class="snum" style="color:var(--accent-amber);">03</div>
+        <div class="sdiv"></div>
+        <div class="stitle">팀원들<br>동시 출발</div>
+        <div class="sdesc">필요한 skills/ 자동 로드. 팀원끼리 직접 소통하며 작업.</div>
+      </div>
+      <div class="step">
+        <div class="snum" style="color:var(--accent-amber);">04</div>
+        <div class="sdiv"></div>
+        <div class="stitle">검토 → 나에게<br>최종 보고</div>
+        <div class="sdesc">Hooks가 자동 검증. 팀장이 종합해서 전달.</div>
+      </div>
+    </div>
+    <div class="footer"><div class="page">76 / 80</div></div>
+  </section>
+
+  <!-- 62 — 전체 시리즈 정리 -->
+  <section class="slide" data-label="Series Summary">
+    <div class="eyebrow amber">지금까지 이 시리즈에서</div>
+    <div class="title" style="margin-top:24px;max-width:1600px;">네 개의 개념,<br>하나의 방향.</div>
+    <div style="flex:1;display:flex;flex-direction:column;justify-content:center;gap:32px;margin-top:32px;">
+      <div style="display:flex;gap:40px;align-items:baseline;padding:28px 0;border-top:1px solid rgba(255,255,255,0.08);">
+        <div style="font-family:var(--font-mono);color:var(--accent-purple);font-size:26px;min-width:80px;">Ch.01</div>
+        <div style="font-size:36px;font-weight:600;min-width:520px;">프롬프트 엔지니어링</div>
+        <div style="font-size:28px;color:var(--text-secondary);">지시를 잘 내리는 법</div>
+      </div>
+      <div style="display:flex;gap:40px;align-items:baseline;padding:28px 0;border-top:1px solid rgba(255,255,255,0.08);">
+        <div style="font-family:var(--font-mono);color:var(--accent-cyan);font-size:26px;min-width:80px;">Ch.02</div>
+        <div style="font-size:36px;font-weight:600;min-width:520px;">컨텍스트 엔지니어링</div>
+        <div style="font-size:28px;color:var(--text-secondary);">AI를 우리 팀원으로 만드는 법</div>
+      </div>
+      <div style="display:flex;gap:40px;align-items:baseline;padding:28px 0;border-top:1px solid rgba(255,255,255,0.08);">
+        <div style="font-family:var(--font-mono);color:var(--accent-purple);font-size:26px;min-width:80px;">Ch.03</div>
+        <div style="font-size:36px;font-weight:600;min-width:520px;">에이전틱 엔지니어링</div>
+        <div style="font-size:28px;color:var(--text-secondary);">AI 팀 조직을 설계하는 법</div>
+      </div>
+      <div style="display:flex;gap:40px;align-items:baseline;padding:28px 0;border-top:1px solid rgba(255,255,255,0.08);border-bottom:1px solid rgba(255,255,255,0.08);">
+        <div style="font-family:var(--font-mono);color:var(--accent-amber);font-size:26px;min-width:80px;">Ch.3.5</div>
+        <div style="font-size:36px;font-weight:600;min-width:520px;">에이전틱 실행편</div>
+        <div style="font-size:28px;color:var(--text-secondary);">그 조직을 실제로 세팅하는 법</div>
+      </div>
+    </div>
+    <div class="caption" style="margin-top:28px;">이 구조가 머릿속에 들어오면, 다음에 새 AI 용어가 나와도 흔들리지 않습니다. 어떤 개념이든 결국 이 구조 어딘가에 꽂힙니다.</div>
+    <div class="footer"><div class="page">77 / 80</div></div>
+  </section>
+
+  <!-- 신규 — 한계와 비용 -->
+  <section class="slide" data-label="Limits and Cost">
+    <div class="eyebrow amber">잊지 말 것</div>
+    <div class="title" style="margin-top:24px;">가능성만 봤습니다.<br>한계도 봐야 합니다.</div>
+    <div class="recipe" style="grid-template-columns:repeat(3,1fr);margin-top:48px;">
+      <div class="card">
+        <div class="cnum" style="color:var(--accent-amber);">01</div>
+        <div class="ctitle">할루시네이션</div>
+        <div class="csub">AI는 자신만만하게 틀립니다. 숫자·인용·고유명사·코드는 사람이 한 번 더 검증.</div>
+      </div>
+      <div class="card">
+        <div class="cnum" style="color:var(--accent-amber);">02</div>
+        <div class="ctitle">토큰 비용</div>
+        <div class="csub">멀티에이전트 풀스택은 단일 호출의 10~15배. 일상 업무 전부에 다 쓰지 않습니다.</div>
+      </div>
+      <div class="card">
+        <div class="cnum" style="color:var(--accent-amber);">03</div>
+        <div class="ctitle">검증 루틴</div>
+        <div class="csub">"결과 받았으면 5초 의심." 출처·숫자·날짜를 손으로 한 번 확인하는 습관.</div>
+      </div>
+    </div>
+    <div class="caption" style="margin-top:36px;">팀을 설계하는 사람은 팀이 어디서 멈춰야 하는지도 설계해야 합니다.</div>
+    <div class="footer"><div class="page">78 / 80</div></div>
+  </section>
+
+  <!-- 마치며 -->
+  <section class="slide s-close" data-label="Final Closing">
+    <div class="eyebrow amber">마치며</div>
+    <div class="lead" style="margin-top:24px;">
+      프롬프트가 <em style="color:var(--accent-purple);">지시</em>였고,<br>
+      컨텍스트가 <em style="color:var(--accent-cyan);">온보딩</em>이었다면,<br>
+      에이전틱은<br>
+      <em style="color:var(--accent-amber);">조직을 설계하는 일</em>입니다.
+    </div>
+    <div class="tag" style="margin-top:40px;">가능성은 엄청납니다. 그리고 그만큼 책임도 따릅니다.<br>팀을 설계하는 사람은 팀이 어디까지 움직이고, 어디서 멈춰야 하는지도 설계해야 합니다.</div>
+
+    <div class="footer"><div class="page">79 / 80</div></div>
+  </section>
+
+  <!-- 64 — Q&A 슬라이드 -->
+  <section class="slide" data-label="QnA">
+    <div class="eyebrow">Q &amp; A</div>
+    <div class="title-lg" style="margin-top:32px;">질문 있으신 분?</div>
+    <div class="body-sec" style="margin-top:40px;max-width:1400px;font-size:30px;">지금까지 나온 개념 중 헷갈리는 것, 실제 업무에 어떻게 적용할지 막히는 것, 뭐든 좋습니다.</div>
+    <div class="bullets" style="margin-top:56px;">
+      <div class="bullet"><div class="idx" style="color:var(--accent-purple);">01</div><div class="txt"><b>프롬프트 / 컨텍스트 / 에이전틱</b> <span>— 개념 구분이 헷갈린다면</span></div></div>
+      <div class="bullet"><div class="idx" style="color:var(--accent-cyan);">02</div><div class="txt"><b>보안 이슈</b> <span>— 실제로 얼마나 위험한지, 어디까지 써도 되는지</span></div></div>
+      <div class="bullet"><div class="idx" style="color:var(--accent-amber);">03</div><div class="txt"><b>프롬프트 재사용</b> <span>— 잘 만든 프롬프트, 어떻게 저장하고 반복 활용할 수 있는지</span></div></div>
+    </div>
+    <div class="footer"><div class="page">80 / 80</div></div>
+  </section>
+
+</deck-stage>
+
+<script src="deck-stage.js"></script>
+<script>
+  // Prompter sync bridge: postMessage (iframe parent) + BroadcastChannel (separate window)
+  customElements.whenDefined('deck-stage').then(() => {
+    const stage = document.querySelector('deck-stage');
+    if (!stage) return;
+    let bc = null;
+    try { bc = new BroadcastChannel('ai_literacy_sync_v2'); } catch (e) {}
+
+    function forwardOut(idx) {
+      try {
+        if (window.parent && window.parent !== window) {
+          window.parent.postMessage({ slide: idx }, '*');
+        }
+      } catch (e) {}
+      try { if (bc) bc.postMessage({ slide: idx }); } catch (e) {}
+    }
+
+    // ── 「에이전트란?」(전우치) 슬라이드: 진입 3초 후 효과음(aksa.mp3) + 낭송 순차 강조 ──
+    const slideEls = [...document.querySelectorAll('deck-stage > section.slide')];
+    const cueAudio = new Audio('aksa.mp3');
+    cueAudio.preload = 'auto';
+    let cueTimer = null;
+    const muteBtn = document.getElementById('cue-mute');
+
+    function stopCueAudio() {
+      if (cueTimer) { clearTimeout(cueTimer); cueTimer = null; }
+      try { cueAudio.pause(); cueAudio.currentTime = 0; } catch (e) {}
+    }
+    function playCueAudio() {
+      try { cueAudio.currentTime = 0; const p = cueAudio.play(); if (p && p.catch) p.catch(() => {}); } catch (e) {}
+    }
+    if (muteBtn) {
+      muteBtn.addEventListener('click', () => {
+        if (muteBtn.dataset.on === '1') { stopCueAudio(); muteBtn.dataset.on = '0'; muteBtn.setAttribute('aria-label', '음악 켜기'); }
+        else { playCueAudio(); muteBtn.dataset.on = '1'; muteBtn.setAttribute('aria-label', '음악 끄기'); }
+      });
+    }
+
+    // 낭송 — 회색 기본, 차례가 오면 흰색+확대(3초), 한 바퀴만 진행(무한루프 X). 재진입 시 다시 시작
+    const reciteSeg = [...document.querySelectorAll('section[data-label="Agent Intro Quote"] .recite-seg')];
+    let reciteTimer = null, reciteIdx = 0;
+    function reciteStep() {
+      reciteSeg.forEach((s) => s.classList.remove('on'));
+      if (reciteSeg[reciteIdx]) reciteSeg[reciteIdx].classList.add('on');
+      reciteIdx += 1;
+      if (reciteIdx < reciteSeg.length) { reciteTimer = setTimeout(reciteStep, 3000); }
+    }
+    function startRecite() { stopRecite(); reciteIdx = 0; reciteStep(); }
+    function stopRecite() { if (reciteTimer) { clearTimeout(reciteTimer); reciteTimer = null; } reciteSeg.forEach((s) => s.classList.remove('on')); }
+
+    function handleCueAudio(idx) {
+      stopCueAudio();
+      stopRecite();
+      const el = slideEls[idx];
+      if (el && el.dataset.label === 'Agent Intro Quote') {
+        if (muteBtn) { muteBtn.dataset.on = '1'; muteBtn.setAttribute('aria-label', '음악 끄기'); }
+        startRecite();
+        cueTimer = setTimeout(() => { if (!muteBtn || muteBtn.dataset.on === '1') playCueAudio(); }, 3000);
+      }
+    }
+
+    // Listen on own window (deck-stage posts {slideIndexChanged} here, parent posts {slide} here)
+    window.addEventListener('message', (ev) => {
+      const d = ev.data;
+      if (!d || typeof d !== 'object') return;
+      if (typeof d.slideIndexChanged === 'number') {
+        handleCueAudio(d.slideIndexChanged);
+        forwardOut(d.slideIndexChanged);
+        return;
+      }
+      if (typeof d.slide === 'number') {
+        stage.goTo(d.slide);
+        return;
+      }
+    });
+
+    // BroadcastChannel: cross-window sync with Prompter
+    if (bc) {
+      bc.addEventListener('message', (ev) => {
+        const d = ev.data;
+        if (!d || typeof d !== 'object') return;
+        if (typeof d.slide === 'number') stage.goTo(d.slide);
+        if (d.type === 'CHECK_CONNECT') {
+          try { bc.postMessage({ type: 'CONNECT_ACK' }); } catch (e) {}
+        }
+      });
+    }
+
+    // Announce initial position so Prompter can sync on connect
+    setTimeout(() => { handleCueAudio(stage.index || 0); forwardOut(stage.index || 0); }, 0);
+  });
+</script>
+</body>
+</html>

@@ -1,0 +1,239 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>AI Literacy Club - Teleprompter</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700;900&family=Noto+Sans+KR:wght@300;500;700;900&display=swap" rel="stylesheet">
+    <style>
+        :root { --bg: #000; --text: #fff; --dim: #444; --border: #222; --accent: #8E8E93; }
+        * { box-sizing: border-box; margin: 0; padding: 0; -webkit-user-select: none; user-select: none; }
+        body { background: var(--bg); color: var(--text); font-family: 'Inter', 'Noto Sans KR', sans-serif; height: 100vh; display: flex; flex-direction: column; overflow: hidden; }
+        
+        header { padding: 15px 40px; background: #000; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--border); }
+        .time-box { display: flex; gap: 40px; font-size: 13px; color: #666; font-weight: 700; }
+        .time-box b { color: #fff; margin-left: 8px; font-variant-numeric: tabular-nums; }
+        
+        .btn-ui { background: #111; color: #fff; border: 1px solid #333; padding: 6px 15px; font-size: 11px; font-weight: 700; cursor: pointer; transition: 0.2s; }
+        .btn-ui:hover { background: var(--accent); color: #fff; border-color: var(--accent); }
+
+        #main { flex: 1; display: flex; }
+        
+        #sidebar { width: 320px; background: #000; border-right: 1px solid var(--border); display: flex; flex-direction: column; padding: 25px; }
+        .thumb-container { width: 100%; aspect-ratio: 16/9; position: relative; overflow: hidden; border: 1px solid var(--border); background: #111; border-radius: 8px; }
+        iframe { width: 100%; height: 100%; border: none; pointer-events: none; }
+        
+        .slide-meta { margin-top: 25px; }
+        .slide-num { font-size: 44px; font-weight: 900; letter-spacing: -0.05em; line-height: 1; color: var(--accent); }
+        .slide-title { font-size: 15px; color: #888; margin-top: 15px; font-weight: 700; border-left: 2px solid var(--accent); padding-left: 12px; line-height: 1.4; word-break: keep-all; }
+
+        #script-area { flex: 1; padding: 80px 100px; overflow-y: auto; background: #000; cursor: pointer; }
+        .script-content { font-size: 46px; font-weight: 400; line-height: 1.7; word-break: keep-all; color: #fff; text-align: justify; white-space: pre-wrap; }
+        .script-content b { color: #fff; font-weight: 900; text-decoration: underline; text-decoration-color: var(--accent); text-underline-offset: 8px; text-decoration-thickness: 3px; }
+
+        #editor-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.95); z-index: 1000; display: none; padding: 60px; flex-direction: column; }
+        #editor-overlay.on { display: flex; }
+        textarea { flex: 1; background: #111; border: 1px solid #333; color: #fff; padding: 30px; font-family: monospace; font-size: 16px; line-height: 1.6; resize: none; outline: none; border-radius: 12px; }
+        .editor-footer { margin-top: 20px; display: flex; justify-content: flex-end; gap: 15px; }
+        
+        .status-tag { font-size: 11px; padding: 7px 12px; border: 1px solid #222; color: #333; font-weight: 900; letter-spacing: 0.1em; transition: 0.3s; border-radius: 4px; }
+        .status-tag.active { color: var(--accent); border-color: var(--accent); background: rgba(142,142,147,0.12); }
+    </style>
+</head>
+<body>
+
+<header>
+    <div class="time-box">
+        <div>CLOCK <b id="clock">00:00:00</b></div>
+        <div>RUNNING <b id="elapsed">00:00:00</b></div>
+    </div>
+    <div style="display:flex; gap:12px; align-items:center;">
+        <button class="btn-ui" id="btn-edit">EDIT SCRIPT</button>
+        <div id="sync-status" class="status-tag">SYNC INACTIVE</div>
+    </div>
+</header>
+
+<div id="main">
+    <div id="sidebar">
+        <div class="thumb-container"><iframe id="slideFrame" src="index2.html"></iframe></div>
+        <div class="slide-meta">
+            <div class="slide-num" id="s-num">01</div>
+            <div class="slide-title" id="s-title">READY</div>
+        </div>
+    </div>
+    <div id="script-area"><div id="text-view" class="script-content"></div></div>
+</div>
+
+<div id="editor-overlay">
+    <div style="font-size: 24px; font-weight: 900; margin-bottom: 20px; color: var(--accent);">PASTE SCRIPT (Slide XX: Title "Content")</div>
+    <textarea id="script-input" placeholder='Slide 01: 커버 (인트로) "안녕하세요, AI 리터러시 클럽입니다."'></textarea>
+    <div class="editor-footer">
+        <button class="btn-ui" id="btn-close">CANCEL</button>
+        <button class="btn-ui" id="btn-apply" style="background:var(--accent); color:#fff; border:none; padding:10px 24px; font-size:14px;">APPLY</button>
+    </div>
+</div>
+
+<script>
+    // 80 슬라이드 대본 정렬
+    let scripts = [
+        { title: "Cover (AI 직원 사용 설명서)", text: `먼저, 오늘 이 자리에 나와 주셔서 진심으로 감사합니다. 그리고 솔직하게 시작하겠습니다. 저는 AI 전문가가 아닙니다. 그저 AI라는 도구를 남들보다 조금 더 많이 굴려본 사람일 뿐입니다. 같은 회사에서 각자 자기 분야의 프로로 일하시는 여러분이 얼마나 깊은 도메인 지식을 가지고 계신지 저는 너무 잘 알고 있습니다. AI 관련 업무를 하시는 분들, 공학자분들, 코딩과 정말 가까운 곳에서 일하시는 분들도 계시고요. 그런 분들 앞에서 이걸 감히 '강의'라고 부르기에는 솔직히 좀 민망합니다. 그래서 오늘 다룰 내용 중에 이미 아시는 부분이 분명히 있을 거예요. 그래도 같이 들어주시면 정말 감사하겠습니다. 오늘은 거창한 강의라기보다, 먼저 굴러본 사람으로서 알게 된 <b>코딩과 AI의 기초 개념</b>을 편하게 나누는 자리, 모두가 한 번쯤 '내가 직접 만들었다'는 그 재미를 느껴보실 수 있도록 멍석을 깔아드리는 시간 정도로 봐주시면 좋겠습니다. 사실 제가 진짜 궁금한 건 따로 있어요. 여러분 각자가 가진 그 깊은 도메인 지식이 이 '코딩'이라는 도구와 만났을 때 어떤 시너지를 낼지, 솔직히 너무 궁금합니다. 오늘 이 시간이 그 만남의 작은 계기가 된다면, 저는 그것만으로도 정말 보람찰 것 같습니다. 그래서 한 가지 욕심을 부려보자면, 오늘 이 시간이 끝났을 때 여러분 각자가 바이브 코딩이든, 업무 자동화든, 삶에 필요한 작은 도구든 직접 만들어 보시고, 서로의 결과물에서 영감을 주고받는 <b>'크리에이터 생태계'</b>가 우리 안에서 작게나마 자라났으면 합니다. 오늘은 그 첫 점을 함께 찍는 자리라고 생각하고, 정말 편하게 들어주세요.` },
+        { title: "Agenda", text: `오늘은 크게 네 편으로 나눠 달립니다. 1편 <b>프롬프트 엔지니어링</b> — AI에게 일을 정확히 시키는 법. 2편 <b>컨텍스트 엔지니어링</b> — AI가 우리 회사를 알게 만드는 법. 3편 <b>에이전틱 엔지니어링</b> — 한 명에서 팀으로 조직을 짜는 법. 그리고 3.5편 <b>실행편</b> — Claude Code로 첫 AI 팀을 직접 세팅까지. 개념부터 실습까지, 오늘 한 번에 갑니다.` },
+        { title: "Intro Hook", text: `명은 떨어졌습니다. 위에서는 AX를 외치고, 이제 한 사람당 에이전트 하나씩 가지라고 하십니다. 그런데 솔직히 가봅시다. 이 방에서 '에이전트가 뭔지' 한 문장으로 말할 수 있는 분, 몇이나 되시나요. 우리는 아직 LLM 하나 손에 익히는 중인데, 위에서는 그 LLM으로 무장한 부대를 한 명씩 거느리라고 합니다. 여기서 두 갈래입니다. '아직 우리한텐 이르다'며 미루거나, 아니면 남들 어명 받드는 동안 우리도 받들거나. 저는 후자를 권합니다. 이건 빨라서 손해 보는 게임이 아니라, 늦으면 도태되는 게임이거든요. 그러니 오늘은 만드는 법부터 가르치지 않습니다. <b>'그게 뭐길래'</b>, 이것부터 짧게 끝내고 본론으로 갑니다. 어명을 받들려면, 그게 무슨 뜻인지는 알아야 하니까요.` },
+        { title: "Agent Intro Quote", text: `자, 본론 들어가기 전에 — 에이전트가 도대체 뭔지부터 분위기 한번 잡고 가겠습니다. (페이지 넘기고 3초쯤 뒤에 음악이 잠깐 깔립니다.) 영화 〈전우치〉 보셨죠? 거기 '도사가 무엇이냐' 하는 명장면을, 에이전트 버전으로 바꿔봤습니다. <b>"에헴! 에이전트가 무엇이냐. 복잡한 맥락을 다스리고, 열린 프롬프트에 답을 내리며, 앱을 넘나들며, 치밀한 루프를 파이프라인 태워 난제를 가르고, 여러 도구를 꽃처럼 다룰 줄 알며, 사람을 돕는 게 바로 에이전트의 일이다!"</b> 좀 거창했죠? 근데 핵심은 다 들어 있어요. 맥락을 읽고, 도구를 넘나들며, 막히면 스스로 길을 찾아 끝까지 간다. 이걸 다음 장에서 딱 한 문장으로 정리해 드리겠습니다.` },
+        { title: "Agent Definition", text: `딱 한 문장만 가져가십시오. <b>일하는 도중에 다음에 뭘 할지 스스로 정하면 에이전트, 미리 짜둔 순서대로만 가면 그냥 도구입니다.</b> 차이는 딱 하나 — 다음 수를 누가 정하느냐예요. 맨 아래 매크로·자동화는 엑셀 매크로처럼 정해둔 순서만 정확히 밟습니다. 다음 수는 사람이 미리 짜둔 거죠. 가운데 'AI 붙은 자동화'는 챗GPT에 묻는 겁니다. 답은 똑똑한데, 그다음 뭘 할지는 매번 내가 정해야 해요. 맨 위가 에이전트입니다. 막히면 스스로 다시 찾고, 결과를 보고 다음 단계까지 알아서 이어갑니다. 다음 수를 AI가 그때그때 정하는 거예요. 한마디로, 도구는 내가 매 단계 운전하는 거고, 에이전트는 목적지만 주면 알아서 가는 자율주행입니다.` },
+        { title: "Famous Agents", text: `앞에서 봤듯 이 셋은 전부 같은 에이전트입니다. 그럼 뭐가 다르냐. 우리 식으로, 외주냐 인하우스냐로 보면 한눈에 들어옵니다. <b>마누스</b>는 턴키 외주입니다. 완성본만 받아요. 빠르고 편한데, 과정도 톤도 보안도 블랙박스라 우리 색을 못 입힙니다. 우리 규정에 맞는지, 그 작업이 어디서 돌아가는지조차 확인이 안 되고요. <b>헤르메스와 오픈클로</b>는 반대예요. 검증 안 된 신생 외주한테 회사 자료를 통째로 넘겨야 쓸 수 있습니다. 그래서 멋지게 포장하죠 — '쓸수록 스스로 학습한다', '직원 수백 명이 일하는 것 같다'. 함정이 있어요. '스스로 학습한다'는 건 내가 모르는 사이에 일하는 방식이 바뀐다는 뜻이라 검증이 안 되고, '수백 직원'도 실제론 기능 목록이 수백 개일 뿐 속은 LLM 하나가 순서대로 도는 겁니다. 게다가 만든 사람이 직접 '커맨드라인 못 다루면 위험하다'고 경고할 만큼 날것이라, 비개발자가 회사 데이터를 올려 쓰기엔 무립니다. 공통 한계는 하나예요 — <b>과정이 안 보이고(검증 불가), 우리 일에 정확히 안 맞습니다(통제 불가).</b> 그래서 우리가 설 자리는 분명합니다. 턴키 외주도, 위험한 신생 외주도 아닌, <b>직접 브리핑해 데리고 일하는 인하우스 팀.</b> 그게 클로드 코드입니다.` },
+        { title: "Why Build It", text: `'직접 만든다'에 또 겁먹지 마십시오. 우리가 LLM을 만드는 게 아닙니다. <b>회로판은 우리가 깔고, 전기는 LLM이 흘립니다.</b> 그 전기가 바로 우리가 늘 쓰는 Claude예요. 대화하는 그 Claude에 파일·검색·실행이라는 '손발'을 달아 직접 일하게 만든 게 <b>Claude Code</b>입니다. 회로판은 역할·도구·금지선, 즉 일할 판이고요. 남의 완제품을 빌리지 않고 직접 깔면 세 가지가 생깁니다. 첫째, 매 단계 뭘 하는지 눈앞에서 <b>훤히 보입니다.</b> 둘째, 내 파일·업무 규칙·회사 보안에 <b>우리한테 맞춰</b> 깝니다. 셋째, 권한도 금지선도 내가 정하니 <b>고삐를 내가 쥡니다</b> — 알아서 24시간 도는 불안이 없어요. 아직 공식 도입이 된 건 아닙니다. 그래서 더, 지금 미리 손에 익혀두자는 거예요. 자, 여기까지가 '그게 뭐길래'였습니다. 이제 그 똑똑한 직원에게 말 거는 법부터 — 1편입니다.` },
+        { title: "Chapter 1 Opener", text: `첫 번째 핸드북, <b>'프롬프트 엔지니어링, 다시'</b>입니다. 솔직히 말할까요? 프롬프트 엔지니어링, 유행 2년 전에 지났습니다. 근데 왜 또 하냐고요? 유행은 지났는데, 제대로 하는 사람은 여전히 없거든요. 다들 안다고 착각만 하고 있을 뿐입니다.` },
+        { title: "Ch1 TOC", text: `이번 챕터는 이렇게 흘러갑니다. 1. 지금 너무 많은 용어들 속에서 알맹이만 남기기. 2. 대충 시켰을 때 여러분의 업무가 어떻게 '유사과학'으로 변하는지 확인하기. 3. 지시의 네 가지 기본 재료 배우기. 4. 그리고 여러분의 업무를 망치고 있는 그 지독한 습관 세 가지를 교정할 겁니다.` },
+        { title: "Section 01", text: `섹션 1, <b>'지금 너무 많다'</b>입니다. 일주일에 두 개씩 새로운 개념이 튀어나오는 시대예요. 다들 따라가느라 숨 가쁘시죠?` },
+        { title: "Too Many Terms", text: `여기 나열된 단어들 좀 보세요. RAG, MCP, 멀티모달, 에이전틱 워크플로우.... 여러분, 뉴스레터 17개씩 구독하면서 이거 다 공부하시잖아요. 근데 솔직히 고백합시다. 이거 다 안다고 일 잘합니까? 개념 공부만 하다가 정작 대화창에는 '이거 요약해줘' 한 줄 쓰고 있잖아요. 그건 리터러시가 아니라 그냥 정보 비만입니다.` },
+        { title: "Misconception", text: `최근 어느 컨퍼런스 커피브레이크에서 이런 소리가 들리더군요. '프롬프트 엔지니어링? 그거 GPT-3 시절 얘기 아니야? 모델이 좋아져서 대충 써도 다 알아듣던데?'. 네, 아주 용감한 소리죠.` },
+        { title: "Half True", text: `방금 그 생각, <b>절반은 맞고 절반은 틀렸습니다</b>. 모델이 좋아져서 허술하게 말해도 찰떡같이 알아듣는 건 맞아요. 근데 문제는, 좋은 도구일수록 제대로 쓸 줄 아는 사람과 아닌 사람의 격차는 안드로메다만큼 벌어진다는 겁니다. 도구가 좋아질수록 실력 차이는 더 처참하게 드러나는 법이죠.` },
+        { title: "Hammer Analogy", text: `비유 하나 할까요? 작은 망치든 큰 망치든, 못을 제대로 겨누지 않으면 여러분 엄지손가락이 희생되는 건 똑같습니다. 도구가 자동 조준 기능을 달고 나왔다고 해서, 여러분이 조준을 안 해도 된다는 뜻은 아닙니다. 조준은 여전히 인간의 몫입니다.` },
+        { title: "Foundation", text: `결론입니다. <b>프롬프트는 모든 AI 활용의 기초 공사입니다.</b> 요즘 유행하는 컨텍스트 엔지니어링이니, 에이전틱이니 하는 것들, 뚜껑 열어보면 전부 밑바닥엔 프롬프트가 깔려 있어요. 기초 공사 대충 하면 그 위에 짓는 건물은 그냥 모래성입니다.` },
+        { title: "Section 02", text: `섹션 2, <b>'대충 쓰면 생기는 일'</b>입니다. AI가 헛소리를 한다고요? 아니요, 여러분이 헛소리를 유도한 걸 겁니다.` },
+        { title: "Monday Slack", text: `상상해 보세요. 월요일 아침 9시 7분, 팀장님이 업무 카톡으로 딱 한 줄 보냅니다. '이번 분기 주요 이슈 정리해줘.'. 여러분 기분이 어때요? '이 양반이 뭐라는 거야?' 싶죠? 매출? 프로젝트? KPI?. 결국 아무거나 대충 만들어서 갖다 주면 팀장님이 뭐라고 합니까? '이게 아니잖아요.'. AI도 지금 여러분에게 똑같이 느끼고 있습니다.` },
+        { title: "Section 03", text: `섹션 3, <b>'네 가지 기본 재료'</b>입니다. 지시에도 레시피가 있어요.` },
+        { title: "Four Ingredients", text: `이 네 가지만 기억하세요. 역할: 너는 누구야. 맥락: 상황이 이래. 형식: 이렇게 줘. 제약: 이건 하지 마. '마케팅 자료 써줘'라고 하지 말고, '너는 5년 차 콘텐츠 마케터고, 고객이 이런 상황이니까, 3줄 요약해서 제약 사항 지켜서 써줘'라고 하라는 겁니다. 알고 빼는 것과 몰라서 못 넣는 건 하늘과 땅 차이입니다.` },
+        { title: "Role Deep Dive", text: `역할은 <b>AI의 뇌를 세팅</b>하는 겁니다. 초등학교 선생님으로 세팅하면 비유를 써서 친절하게 설명할 거고, 전략 컨설턴트로 세팅하면 데이터와 논리 프레임을 들이밀 겁니다. 똑같은 주제도 역할 하나에 결과가 완전히 달라집니다.` },
+        { title: "Real Prompt", text: `예시를 보죠. MZ 타깃 수면 앱 카드뉴스 포스팅입니다. 역할, 맥락, 형식, 제약이 다 들어갔죠?. 특히 저 '의학 용어 금지' 같은 제약이 중요합니다. 말 안 하면 AI는 신나서 자기 아는 어려운 말 다 쏟아낼 거거든요. 이렇게 시키면 재요청할 일이 확 줄어듭니다.` },
+        { title: "Section 04", text: `섹션 4, <b>'망치는 습관 셋'</b>입니다. 아는데도 반복하는 그 지독한 습관들을 좀 고쳐봅시다.` },
+        { title: "Three Bad Habits", text: `1번, 한 프롬프트에 출력 종류 여러 개 섞기. 요즘 모델은 다단계 작업도 곧잘 합니다. 다만 출력이 요약·이메일·슬라이드처럼 종류가 갈리면 다 얕아져요. <b>출력 종류는 하나로</b> 모으세요. 2번, 맘에 안 들면 그냥 '다시 해줘'. 뭐가 왜 별로인지 말 좀 하세요. 3번, 프롬프트를 한 번만 쓰기. 이건 검색이 아니라 '대화'이자 '편집' 과정입니다. 피드백을 주며 좁혀가야 진짜 결과가 나옵니다.` },
+        { title: "Template", text: `오늘의 실습 과제입니다. 이 빈칸들 채워서 메모장에 저장해 두세요. 반복 업무할 때마다 꺼내 쓰면 됩니다. 이거 채우는 게 귀찮으면 그냥 계속 야근하시면 됩니다.` },
+        { title: "Closing", text: `챕터 1 마무리합니다. 프롬프트 엔지니어링은 AI 기술이 아닙니다. <b>사람에게 일을 잘 시키는 능력</b>을 AI에게 적용하는 것뿐입니다. 역할을 주고, 맥락을 설명하고, 형태를 정하고, 안 되는 건 못 박으세요. 이게 지휘자의 기본입니다.` },
+        { title: "Chapter 2 Opener", text: `자, 두 번째 핸드북으로 넘어갑니다. <b>'AI가 우리 회사 사람이 되는 법'</b>입니다. 챕터 1에서 지시 내리는 법을 배웠으니 이제 일을 잘하겠지 싶으시죠? 천만에요. 지시는 완벽했는데 결과물을 받아보면 어딘가 우리 팀 느낌이 안 날 때가 있을 겁니다. 그 이유를 지금부터 파헤쳐 보죠.` },
+        { title: "Ch2 TOC", text: `이번 챕터의 흐름입니다. 1. 왜 지시가 완벽해도 결과가 어색한지 그 근본적인 한계를 짚어보고요. 2. AI에게 넘겨야 할 맥락, 즉 컨텍스트의 세 가지 종류를 배울 겁니다. 3. 마지막으로 정성껏 만든 컨텍스트를 한순간에 쓰레기로 만드는 나쁜 습관들까지 교정하겠습니다.` },
+        { title: "Feels Off", text: `이런 경험 다들 있으시죠? 역할도 줬고, 맥락도 줬고, 형식도 맞췄습니다. 근데 결과물은? 우리 팀이 절대 안 쓰는 말투거나, 우리 클라이언트가 보면 뒷목 잡을 표현들이 섞여 있습니다. AI가 틀린 게 아닙니다. 그냥 <b>우리 회사를 모를 뿐</b>이에요. '교과서'만 읽고 온 신입한테 '현장'의 바이브를 기대하는 것 자체가 욕심입니다.` },
+        { title: "New Hire Analogy", text: `비유하자면, 입사 첫날 신입사원이 교과서에서 배운 대로만 일하는 것과 똑같습니다. 틀린 말은 아닌데, 우리 팀 스타일은 절대 아닌 그 어색한 상태 말이죠. 이 신입한테 필요한 건 더 똑똑한 뇌가 아니라, 우리 팀의 '매뉴얼'과 '분위기'입니다.` },
+        { title: "Prompt vs Context", text: `개념 정리 한번 하고 가죠. 프롬프트 엔지니어링이 <b>'오늘의 업무 지시서'</b>라면, 컨텍스트 엔지니어링은 <b>'입사 온보딩 자료'</b>입니다. 지시를 매번 잘 내리려고 고생하지 말고, AI에게 우리 회사가 어떻게 돌아가는지 '배경'부터 먼저 깔아주라는 겁니다.` },
+        { title: "Onboarding Cost", text: `여러분이 매번 대화창을 열 때마다 똑같은 배경 설명을 반복하고 있다면, 그건 여러분이 일을 효율적으로 못 하고 있다는 증거입니다. 신입한테 매일 아침 '우리 회사는 이런 데야'라고 설명하면 그게 일을 시키는 겁니까, 교육을 하는 겁니까? AI도 새 대화창을 열면 우리 회사를 모르는 상태로 초기화된다는 걸 잊지 마세요.` },
+        { title: "Dove Copy Case", text: `광고 카피 사례 하나 들려드릴게요. AI한테 '비누 브랜드 Dove 신제품 런칭 카피 써줘'라고 했더니, <b>'입안 가득 사르르 녹는 부드러운 목넘김'</b> 같은 걸 써왔습니다. 먹는 거요. 비누를요. 우리 클라이언트 Dove는 유니레버 비누인데, AI는 마스의 초콜릿 Dove로 착각한 거죠. AI가 멍청한 걸까요? 아니요, 어느 Dove인지·누가 클라이언트인지 컨텍스트를 안 준 사람 탓입니다.` },
+        { title: "Failure Definition", text: `이 사건의 결론은 이겁니다. <b>'에이전트의 실패는 모델의 실패가 아니라 컨텍스트의 실패다'</b>. 프롬프트는 멀쩡했어요. 카피를 쓰라는 명령은 잘 수행했으니까요. 다만 AI가 어느 Dove인지를 몰랐을 뿐입니다.` },
+        { title: "Restaurant Analogy", text: `식당 예약할 때 '4명, 7시'만 말하는 사람이 있고, '부모님 모시고 가니 조용한 1층 자리'라고 말하는 사람이 있습니다. 누가 더 좋은 자리를 받을까요? 당연히 후자입니다. AI에게도 구체적인 컨텍스트를 주면 원하는 결과가 나올 확률이 압도적으로 높아집니다.` },
+        { title: "Three Types Section", text: `자, 그럼 구체적으로 무엇을 넘겨야 할까요? 세 가지로 딱 정리해 드립니다.` },
+        { title: "Three Kinds Grid", text: `이 세 가지만 기억하세요. 1. 우리 회사가 누구고 누구에게 파는지. 2. 우리가 평소에 어떤 말투를 쓰고 어떤 표현을 극혐하는지. 3. 지금까지 이 업무를 어떻게 해왔고 이번 분기 목표가 뭔지. 이 셋 중 하나만 빠져도 AI는 헛소리를 하기 시작합니다.` },
+        { title: "Company Detail", text: `특히 회사 정보를 알려주는 게 중요합니다. '그냥 제안서 써줘'라고 하면 공기업부터 스타트업까지 어디에도 안 맞는 평균값이 나오지만, '우리는 제조업 대상 HR SaaS팀이야'라고 한 줄만 더해도 제안서의 언어가 바로 바뀝니다. 타깃이 관심 가질 핵심 지표가 문장에 녹아들기 때문이죠.` },
+        { title: "Context Template", text: `어려우면 이 템플릿부터 시작하세요. 우리 팀은 무엇을 하고, 고객은 누구고, 말투는 어떻게 할지. 딱 다섯 문장만 채워보세요. 이게 바로 여러분 AI 비서의 <b>'취업 규칙'이자 '온보딩 가이드'</b>가 될 겁니다.` },
+        { title: "Bad Habits Section", text: `마지막으로, 정성껏 만든 컨텍스트를 쓰레기통에 처넣는 나쁜 습관들을 짚어보고 넘어가죠.` },
+        { title: "Three Context Habits", text: `1번, 회사 소개서 20장 통째로 넣기. AI도 질려버립니다. 밀도가 중요하지 길이가 중요한 게 아니에요. 2번, 한 번 만들고 방치하기. 우리 팀 전략이 바뀌었는데 AI는 작년 매뉴얼대로 대답하고 있으면 곤란하죠. 3번, 모든 작업에 똑같은 컨텍스트 쓰기. 사내 보고서용과 고객용은 달라야 합니다. 용도별로 버전을 나누세요.` },
+        { title: "Today Exercise", text: `오늘 당장 이거 세 줄만 적어서 다음 대화창 열 때 맨 앞에 붙여 넣어보세요. 우리 팀이 하는 일, 금지어 리스트, 이번 분기 목표. 이것만 해도 AI 결과물이 '우리 팀원'처럼 변하는 걸 바로 체감하실 겁니다.` },
+        { title: "Closing Ch2", text: `정리하겠습니다. 프롬프트 엔지니어링이 업무 지시라면, 컨텍스트 엔지니어링은 AI를 우리 팀원으로 만드는 '온보딩'입니다.` },
+        { title: "Chapter 3 Opener", text: `세 번째 핸드북, <b>'AI 드림팀 꾸리는 법'</b>입니다. 챕터 2까지 해서 사원 한 명 온보딩은 끝냈죠? 근데 언제까지 한 명만 붙잡고 일일이 심부름시킬 겁니까? 이제 조직을 짜야죠. 팀원 한 명의 한계를 넘어 조직의 힘을 쓰는 법을 알아봅시다.` },
+        { title: "Ch3 TOC", text: `이번 챕터의 로드맵입니다. 1. 에이전틱 AI가 단순 챗과 뭐가 다른지. 2. 에이전트의 실체가 사실 인격이 아니라 '설계도'라는 점. 3. 우리가 쓸 무기인 Claude Code 소개. 4. 마지막으로 자유에는 책임이 따르듯, 에이전트의 위험성까지 짚고 넘어갑니다.` },
+        { title: "Still Manual", text: `온보딩 잘 시켰는데, 아직도 '리서치해', '정리해', '초안 써'라고 하나씩 시키고 계신가요?. 그건 여러분이 AI를 여전히 '도구'로만 보고 있어서입니다. 사원 한 명을 슈퍼맨으로 만들려 하지 마세요. 그런 직원은 현실에도 없고, 있어도 곧 퇴사합니다.` },
+        { title: "Context vs Agentic", text: `컨텍스트가 '좋은 팀원 한 명'을 만드는 온보딩이라면, 에이전틱은 그 팀원들을 모아 <b>'조직'을 설계하는 일</b>입니다. 개별 사원의 역량에 기대는 게 아니라, 시스템이 돌아가게 만드는 게 우리의 다음 목표입니다.` },
+        { title: "No Superman", text: `혼자 다 잘하는 슈퍼맨? 현실에선 번아웃 중이거나 사실 다 못 하고 있을 확률이 높죠. AI도 똑같습니다. 한 대화창에서 모든 걸 다 시키면 결과물 퀄리티가 얕아져요. 그래서 우리는 팀을 꾸려야 하는 겁니다.` },
+        { title: "Workflow Comparison", text: `차이를 보시죠. 기존 방식은 제가 중간에 5번 개입해서 심부름 목록을 일일이 읊어줘야 했습니다. 하지만 에이전틱 방식은 지시 한 번에 리서치, 분석, 작성, 검토 에이전트가 지들끼리 업무를 주고받으며 결과를 가져옵니다. 여러분은 이제 실무자가 아니라 <b>'결과만 받는 상사'</b>가 되는 겁니다. 단, 솔직히 말씀드리면 비용은 단일 호출의 <b>10~15배</b>로 뜁니다. 진짜 분기·병렬이 필요할 때만 — 사실 단일 에이전트에 좋은 컨텍스트를 잘 주는 쪽이 이기는 경우가 더 많아요.` },
+        { title: "Chat Limit", text: `슬픈 사실 하나 알려드릴까요? 여러분이 지금 쓰는 ChatGPT나 Claude 채팅창은 원래 1:1 대화용입니다. 한 번에 한 사람과 한 가지 대화를 하라고 만든 거라, 에이전트끼리 서로 말을 주고받거나 결과를 자동으로 넘겨주는 게 메인이 아니거든요. 물론 ChatGPT Tasks·Claude Projects 같은 신기능으로 흉내 낼 수는 있어요. 직접 쓰고 계시면 — <b>고수 인정</b>. 다만 대부분 사람은 아직 1:1 대화로만 씁니다. 그래서 우리는 이 한계를 깨줄 별도의 도구를 써야 합니다.` },
+        { title: "Agent Reality", text: `여기서 중요한 정의 하나 하고 가죠. 에이전트는 인격이 아닙니다. <b>'상태'</b>입니다. AI라는 '똑똑한 배우'에게 우리가 미리 적어둔 <b>역할 설명서와 업무 매뉴얼</b>을 쥐여준 찰나의 순간이죠. 부르면 그때만 일어나서 일을 합니다. 대화창 닫으면 사라져요 — 인격이 아니라 그 순간의 상태입니다. 에이전트를 만든다는 건 AI 한 명을 영입하는 게 아니라, AI가 들어와서 일할 <b>사무실과 매뉴얼</b>을 미리 차려두는 일에 가깝습니다.` },
+        { title: "Prompt Injection Warning", text: `근데 조심하세요. 일 잘한다고 기밀 파일 막 넘겨주면 큰일 납니다. <b>'프롬프트 인젝션'</b>이라고, 파일 안에 숨겨진 악성 명령어가 여러분의 데이터를 훔쳐 갈 수도 있거든요. 최근 공개된 에이전틱 AI 보안 리서치에서 .docx 파일 하나로 로컬 기밀이 외부로 새는 공격이 실제 시연됐습니다. 똑똑한 직원일수록 사고 치면 규모가 커요. 에이전트의 자율성은 양날의 검이라는 걸 잊지 마세요.` },
+        { title: "How to Use Safely", text: `그래서 보안이 중요합니다. 폴더를 분리해서 에이전트가 접근할 영역을 제한하고, 외부 파일은 항상 주의하세요. 특히 API 키 같은 민감한 정보는 에이전트의 손이 닿지 않는 곳에 격리해야 합니다. 도구를 부리기 전에 안전 장치부터 거는 게 진짜 실력입니다.` },
+        { title: "Start Now With Chat", text: `지금 당장 도구가 없어도 에이전틱 사고를 할 수 있습니다. 대화창을 4개 띄우세요. 리서치, 분석, 작성, 검토 역할을 나눠서 릴레이 시키는 겁니다. 수동이지만, 이 흐름을 직접 경험해봐야 나중에 도구로 자동화할 때 지휘를 제대로 할 수 있습니다.` },
+        { title: "Orchestration Quote", text: `기억하세요. 핵심은 <b>오케스트레이션</b>입니다. 지휘자는 바이올린을 직접 켜지 않아요. 연주자들이 제때 제 소리를 내게 만드는 게 지휘자의 일이죠. 여러분의 역할도 바로 그 '지휘자'입니다.` },
+        { title: "Three Agentic Bad Habits", text: `망치는 법 3가지. 1. 한 명한테 너무 많은 역할 주기. 2. 에이전트 간 소통 흐름(연결)없이 따로 놀게 두기. 3. 중요한 결정에서 사람의 판단을 쏙 빼버리기. 이 중 하나라도 해당하면 그건 팀이 아니라 오합지졸입니다.` },
+        { title: "Agentic Exercise", text: `실습입니다. 여러분의 반복 업무 하나를 골라보세요. 단계를 쪼개고, 어디까지 AI가 할지, 사람은 어디서 판단할지 설계도를 그려보세요. 이 네 가지 질문에 답하는 게 에이전틱 설계의 시작입니다.` },
+        { title: "Chapter 4 Opener", text: `챕터 3.5, 이제 실전 세팅입니다. 복잡한 코드 몰라도 됩니다. 구조만 이해하면 누구나 AI 조직을 만들 수 있습니다.` },
+        { title: "Ch4 TOC", text: `준비물 선택부터 설치, 전체 파일 구조 이해, 그리고 첫 번째 에이전트 실행까지 쭉 달립니다.` },
+        { title: "준비물", text: `오늘 무기는 하나입니다. <b>Claude Code</b> — Anthropic 공식 AI 코딩 에이전트입니다. 설치는 명령어 한 줄이면 끝이고, Node.js 같은 거 미리 안 깔아도 네이티브 설치기가 알아서 해줍니다. 로그인은 평소 쓰던 Claude 계정으로 끝. 요금제는 Pro 20불, Max 100~200불인데 <b>전부 Claude Code가 포함</b>돼요. 다만 구독엔 사용량 한도가 있으니, 많이 굴리면 한도에 걸린다는 것만 기억하세요.` },
+        { title: "Claude Code Prerequisites", text: `준비물은 사실 하나면 됩니다. 강의 전에 설치하라고 한 <b>Claude Code</b>. 설치 명령어 한 줄 돌리고 터미널에 claude 쳐서 로그인까지 됐으면 끝입니다. 나머지는 에이전트가 알아서 챙깁니다 — 실습 중에 뭔가 더 필요하면 터미널에 "이거 설치할까요?" 하고 물어봐요. 엔터 누르고 관리자 비번만 쳐주면 됩니다. <b>Python이나 Git은 오늘 절대 미리 깔지 마세요</b>. 어설프게 손대면 환경변수만 꼬여서 제가 한 명씩 도우러 다녀야 합니다. 빈손으로 와서 에이전트한테 일 시키는 게 오늘의 미덕입니다.` },
+        { title: "Claude Code Setup", text: `권한 설정이 핵심입니다. 처음엔 기본 모드 그대로 쓰세요 — AI가 파일을 고치거나 명령을 돌리기 전에 매번 물어봅니다. 그렇게 한동안 길들이다가, 손에 익으면 Shift+Tab으로 자동 승인까지 단계를 올리면 됩니다. 큰 작업은 Plan 모드로 먼저 계획만 보고, OK 하면 실행 — 사고 방지 안전벨트라고 보시면 됩니다.` },
+        { title: "Claude Code Tips", text: `세 가지만 알아두면 빨라집니다. 첫째, 프로젝트 폴더에서 <b>/init</b> 한 번이면 CLAUDE.md 초안을 만들어 줘요 — 회사·스타일·규칙을 적어두면 매번 자동으로 읽습니다. 둘째, .claude/agents와 .claude/skills 폴더에 역할·매뉴얼을 넣어두면 필요할 때 알아서 꺼내 씁니다. 셋째, 큰 작업은 Plan 모드로 먼저 보고 승인 후 실행 — .git이나 .env 같은 민감 파일은 기본으로 보호되니 안심하세요.` },
+        { title: "Act 1 Problem", text: `자, 이제 손 움직일 시간입니다. 다들 회사에서 AI 쓰신다면서, 솔직히 그림 왼쪽 같지 않습니까? 검색하고, 복붙하고, 요약시키고, 또 복붙하고, 디자인 시키고… 결국 여러분이 5번 개입해야 결과 하나 나옵니다. 오른쪽이 오늘 만들 거예요. 주제 한 줄 던지면 검색·요약·생성·저장이 자동으로 굴러갑니다. 둘 다 AI 쓰는데 결과는 정반대죠. <b>그 차이를 만드는 게 뭘까요?</b> 다음 슬라이드에서 답 드립니다.` },
+        { title: "Act 1.5 Agentic", text: `답은 <b>'에이전틱 AI'</b>입니다. 한 줄로 정의하죠. <b>지시 한 줄에 여러 단계를 스스로 이어서 실행하는 AI.</b> 평소 ChatGPT처럼 질문-답-질문-답 반복하면서 사람이 매번 판단하는 게 아니라, 내가 한 번 던지면 검색·판단·생성·변환을 알아서 끝내는 겁니다. 그리고 오늘 우리가 만들 .md 파일들이 그 워크플로우의 설계도가 됩니다. 코드 아니에요. 그냥 메모장에 한국어로 쓰는 겁니다.` },
+        { title: "Concept to File Map", text: `다음 슬라이드에서 갑자기 .md 파일 세 개가 튀어나올 텐데요 — 사실 이거, 1·2·3편에서 이미 다 배운 내용입니다. 다리 한번 놓고 가죠. <b>Ch.1에서 배운 4 재료</b>(역할·맥락·형식·제약), 이 AI가 누구이고 어떻게 말하는지 — 이게 <b>.claude/agents</b>로 들어갑니다. <b>Ch.2의 3 컨텍스트</b>(회사·스타일·히스토리), 우리 회사 전체에 늘 적용되는 정보 — 이게 <b>CLAUDE.md</b>입니다. <b>Ch.3에서 그린 워크플로우</b>(단계·체크포인트·결과물), 실제로 일을 어떤 순서로 하는지 — 이게 <b>.claude/skills</b>예요. 이 매핑만 머리에 들어오면, 이제부터 .md가 어디서 뭘 한다고 해도 안 헷갈립니다.` },
+        { title: "Act 2 Files", text: `워크플로우 설계도는 딱 3개 파일로 만듭니다. <b>CLAUDE.md</b>는 총괄 지침서 — 늘 먼저 읽고 어떤 순서로 일할지 결정하는 회사 규칙. <b>.claude/agents</b>는 이 AI가 어떤 사람인지, <b>.claude/skills</b>는 어떻게 일할지를 정의합니다. 사용자는 무엇을 할지만 결정하면, 나머지는 이 설계도가 책임집니다. 복잡해 보이죠? <b>실제로는 메모장 3개입니다.</b> 진짜로요.` },
+        { title: "Act 3 Tour", text: `도구는 <b>Claude Code</b> 하나입니다. 화면은 딱 세 가지만 기억하면 돼요. 첫째 <b>작업 폴더</b> — CLAUDE.md랑 .claude 설계도들이 사는 곳. 둘째 <b>지시창</b> — 터미널에 한국어로 한 마디 던지는 곳. 셋째 <b>승인창</b> — 에이전트가 뭘 하기 전에 먼저 보여주고, 여러분이 OK 해야 실행되는 곳. 이 세 개만 알면 오늘 실습은 거의 끝난 거나 다름없습니다. 어려운 명령어 안 외워도 됩니다.` },
+        { title: "Act 4 Setup", text: `자, <b>실습 1</b>입니다. 사실 실습이라기엔 좀 민망할 정도로 단순합니다. 제가 공유드린 노션 링크 들어가서 거기 올려둔 .md 파일 두 개 — <b>CLAUDE.md</b>랑 <b>SKILL.md</b> — 다운로드. 그리고 Claude Code를 띄운 작업 폴더에 그냥 끌어다 놓으세요. 끝입니다. 오늘 여러분이 .md 파일을 직접 만드는 건 아닙니다. <b>작동하는 모습을 먼저 보는 게 목적</b>이에요. 직접 짜는 건 다음 기회에 제대로 다룹니다.` },
+        { title: "Act 5 CardNews", text: `자, 끌어다 놓은 그 두 파일 — 사실 이게 뭐 하는 애들인지 잠깐 보겠습니다. <b>SKILL.md</b>는 카드뉴스의 디자인·워크플로우 룰. <b>CLAUDE.md</b>는 그 워크플로우를 언제·어떻게 돌릴지 총괄하는 지침서. 둘이 합쳐서 — 1단계 뉴스 검색, 2단계 구성안 제안, 3단계 HTML 만들고 PNG로 뽑아 저장. 안에 뭐 적혀있는지 지금 읽을 필요 없습니다. <b>에이전트가 읽습니다.</b> 여러분은 다음 슬라이드에서 한 줄만 던지면 됩니다.` },
+        { title: "Act 6 Execute", text: `이제 진짜입니다. 메신저 창에 이렇게 한 줄 던지세요. <b>"이번 주 AI 업계 동향으로 카드뉴스 만들어줘"</b>. 그리고 가만히 보세요. 1) 웹 검색이 시작되고, 2) 리서치 결과 표가 출력되고, 3) HTML과 PNG 파일이 폴더에 쌓일 겁니다. 그 동안 여러분은 아무것도 안 해도 돼요. <b>이 공백이 여러분이 다른 일을 하는 시간입니다.</b> 명령 한 줄에 5단계 워크플로우가 자동으로 돌아갔어요. 이게 에이전틱 AI입니다.` },
+        { title: "Act 7 Close", text: `실습 끝났습니다. 그런데 여러분, 오늘 만든 이 파일들 — 내일 그대로 쓰세요. 별표 부분을 본인 실제 업무로 바꾸기만 하면 됩니다. 결과가 마음에 안 들면 SKILL.md에 한 줄 추가하고, 새 워크플로우 필요하면 스킬을 하나 더 만드세요. <b>AI를 쓰는 사람과 AI로 시스템을 만드는 사람 — 그 차이는 .md 파일 몇 개입니다.</b> 여러분은 방금 그 선을 넘었습니다.` },
+        { title: "Full Map", text: `이 테이블 하나면 에이전트 구조 정복입니다. 한 가지 미리 말씀드릴게요 — 이 표는 <b>본격 도입할 때 만나는 풍경</b> 기준입니다. 오늘 실습에서 만든 구조가 본격 도입 때도 그대로 커집니다. 파일이 늘어날 뿐 원리는 같아요. <b>CLAUDE.md</b>는 취업규칙, <b>.claude/agents</b>는 직원의 JD, <b>.claude/skills</b>는 업무 매뉴얼입니다. 파일 이름만 봐도 아시겠죠? 여러분은 지금 코딩을 하는 게 아니라 <b>회사를 차리고 있는 겁니다.</b>` },
+        { title: "Folder Structure", text: `폴더 구조가 곧 조직도입니다. <b>project/</b>라는 사무실 안에 CLAUDE.md 취업규칙 파일이 있고, 그 아래 <b>.claude/</b> 폴더에 직원들(agents)과 매뉴얼(skills)이 들어있는 구조죠. 이 폴더를 잘 정돈하는 사람이 일 잘 시키는 지휘자입니다.` },
+        { title: "Take a Step Back", text: `자, 한 발짝 떨어져 봅시다. 실습은 끝났습니다. 여러분 손엔 카드뉴스 PNG 파일들이 쌓였을 거예요. 근데 이게 끝이 아닙니다. 우리가 방금 한 건 <b>입구</b>일 뿐이에요. 이제 큰 그림을 보러 갑시다. 다음 슬라이드에서 — 오늘은 시간상 못 다뤘지만, 알면 한 발 더 멀리 가는 4가지를 빠르게 보여드릴게요.` },
+        { title: "Next Steps Preview", text: `이 4가지가 다음 단계입니다. <b>Hooks</b>는 자동 잠금장치 — AI가 까먹어도 강제로 발동되는 안전장치. <b>Skills</b>는 매번 붙여넣기 대신 파일로 자동 로드되는 컨텍스트의 진화 버전. <b>Agent Teams</b>는 에이전트들이 서로 직접 대화하는 멀티 에이전트 협업. 마지막 <b>토큰 비용</b>은 — 병렬은 빠르지만 비용이 10~15배 뛴다는, 돈 얘기입니다. 오늘은 입구만 봤습니다. 각각이 한 챕터씩 됩니다. 다음에 다루죠.` },
+        { title: "Running Order", text: `실제 구동 순서입니다. 지시 한 번 내리면 <b>CLAUDE.md</b>가 자동 로드되고, 팀장 에이전트 소환되고, 팀원들이 동시에 스킬 꺼내 보면서 작업하고, Hooks가 자동 검증해서 최종 보고합니다. <b>이 아름다운 흐름을 만드는 게 우리의 목표입니다.</b>` },
+        { title: "Series Summary", text: `오늘 우리는 네 개의 챕터를 숨 가쁘게 달려왔습니다. 지시를 잘 내리는 법(프롬프트), AI를 우리 팀원으로 만드는 법(컨텍스트), AI 팀 조직을 설계하는 법(에이전틱), 그리고 그 조직을 실제 시스템으로 구축하는 법(실행편)까지요. 이 네 가지 지도가 머릿속에 있다면, 앞으로 어떤 새로운 AI 기술이 튀어나와도 당황하지 않고 이 지도 어딘가에 꽂아 넣으실 수 있을 겁니다.` },
+        { title: "Limits and Cost", text: `근데 마무리 전에 꼭 짚고 갈 게 있습니다. 가능성만 보여드리고 끝내면 사기죠. 한계도 봐야 합니다. 첫째, <b>할루시네이션</b> — AI는 자신만만하게 틀립니다. 숫자·인용·고유명사·코드는 받자마자 사람이 한 번 더 검증하세요. 둘째, <b>토큰 비용</b> — 멀티에이전트 풀스택은 단일 호출의 10~15배예요. 일상 업무 전부에 다 쓰지 마세요, 카드값 나갑니다. 셋째, <b>검증 루틴</b> — "결과 받았으면 5초 의심." 출처·숫자·날짜 한 번 손으로 확인하는 습관, 자동화될수록 더 중요해집니다. 팀을 설계하는 사람은 팀이 어디서 멈춰야 하는지도 설계해야 합니다.` },
+        { title: "Final Closing", text: `마무리하겠습니다. 프롬프트가 지시였고 컨텍스트가 온보딩이었다면, 에이전틱은 결국 <b>'조직을 설계하는 일'</b>입니다. 가능성이 엄청난 만큼 책임도 큽니다. 팀을 설계하는 여러분은 AI가 어디까지 움직일 수 있고, 또 어디서 멈춰야 하는지도 함께 설계해야 한다는 점을 잊지 마세요.` },
+        { title: "QnA", text: `자, 이제 제 입은 좀 쉬고 여러분의 입을 빌릴 시간입니다. 개념이 헷갈리거나, 보안이 걱정되거나, 당장 내일 업무에 어떻게 적용할지 막막한 부분들, 뭐든 좋습니다. 질문 없으시면 다 이해하신 거로 알고 바로 실습 넘어가겠습니다.` },
+    ];
+
+    let currentSlide = 0;
+    const syncChannel = new BroadcastChannel('ai_literacy_sync_v2');
+
+    function parseCustomFormat(raw) {
+        const result = [];
+        const regex = /Slide\s*(\d+)\s*:\s*([^"]+?)\s*"([\s\S]*?)"/g;
+        let match;
+        while ((match = regex.exec(raw)) !== null) {
+            result.push({ num: match[1], title: match[2].trim(), text: match[3].trim() });
+        }
+        if (result.length === 0) {
+            if (raw.includes('---')) {
+                raw.split(/\n---+\n/).forEach(c => {
+                    const l = c.trim().split('\n');
+                    result.push({ title: l[0], text: l.slice(1).join('\n') });
+                });
+            } else if (/\d+p\s*:/.test(raw)) {
+                const parts = raw.split(/(\d+p\s*:)/g).filter(x => x.trim());
+                for(let i=0; i<parts.length; i+=2) result.push({ title: parts[i], text: parts[i+1] });
+            }
+        }
+        return result.length > 0 ? result : [{title: "Error", text: "형식이 맞지 않습니다."}];
+    }
+
+    function goSlide(idx, isExternal = false) {
+        if (idx < 0 || idx >= scripts.length) return;
+        currentSlide = idx;
+        document.getElementById('s-num').innerText = (currentSlide + 1).toString().padStart(2, '0');
+        document.getElementById('s-title').innerText = scripts[currentSlide].title || "Slide " + (currentSlide + 1);
+        document.getElementById('text-view').innerHTML = scripts[currentSlide].text;
+        
+        document.getElementById('slideFrame').contentWindow.postMessage({ slide: currentSlide }, '*');
+        if(!isExternal) syncChannel.postMessage({ slide: currentSlide });
+        document.getElementById('script-area').scrollTop = 0;
+    }
+
+    const overlay = document.getElementById('editor-overlay');
+    document.getElementById('btn-edit').onclick = () => overlay.classList.add('on');
+    document.getElementById('btn-close').onclick = () => overlay.classList.remove('on');
+    document.getElementById('btn-apply').onclick = () => {
+        const val = document.getElementById('script-input').value;
+        if(val.trim()) {
+            scripts = parseCustomFormat(val);
+            overlay.classList.remove('on');
+            goSlide(0);
+        }
+    };
+
+    document.getElementById('script-area').onclick = (e) => {
+        if (e.clientX > (window.innerWidth + 320) / 2) goSlide(currentSlide + 1);
+        else goSlide(currentSlide - 1);
+    };
+
+    window.onkeydown = (e) => {
+        if (e.key === 'ArrowRight' || e.key === ' ' || e.key === 'PageDown') goSlide(currentSlide + 1);
+        if (e.key === 'ArrowLeft' || e.key === 'PageUp') goSlide(currentSlide - 1);
+    };
+
+    syncChannel.onmessage = (e) => {
+        if (e.data && typeof e.data.slide === 'number') goSlide(e.data.slide, true);
+        if (e.data && e.data.type === 'CONNECT_ACK') {
+            const st = document.getElementById('sync-status');
+            st.classList.add('active'); st.innerText = 'LIVE SYNC ACTIVE';
+        }
+    };
+    setInterval(() => syncChannel.postMessage({ type: 'CHECK_CONNECT' }), 2000);
+
+    const startTs = Date.now();
+    setInterval(() => {
+        document.getElementById('clock').innerText = new Date().toTimeString().split(' ')[0];
+        const diff = Math.floor((Date.now() - startTs) / 1000);
+        const m = String(Math.floor(diff/60)).padStart(2,'0'), s = String(diff%60).padStart(2,'0');
+        document.getElementById('elapsed').innerText = `00:${m}:${s}`;
+    }, 1000);
+
+    window.onload = () => goSlide(0);
+</script>
+</body>
+</html>

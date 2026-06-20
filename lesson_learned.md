@@ -699,4 +699,180 @@ After:
 
 ---
 
+## 2026-06-20 — 제일기획 사내 변형(index2.html) + 클로드 코드 단일 도구 전환
+
+### A. 작업 개요
+원본 `index.html`(80슬라이드, purple/cyan/amber 3색, Pretendard) 을 **보존**하고, 제일기획 사내 세션(같은 '프로'님 대상)용 **클린 에디토리얼 변형** `index2.html`(+`Prompter2.html`) 신규 제작.
+- **폰트**: Pretendard → **Samsung SS Head/Body (+KR)** 로컬 woff2 (`design/fonts/woff2`), JetBrains Mono 는 코드/경로용 유지. 헤드 계열=Head, 본문=Body, 웨이트는 보유분(300/400/500/700)로 정리.
+- **컬러**: 3색 accent → **단색 민트 `#99EADC`** 슬라이드당 ≤1. glow 12개 `display:none`, 그라디언트 38개 flat 치환.
+- **로고**: 우하단 `section.slide::after` 로 전 슬라이드 주입(63×20px≈원본 50%, 흰색 recolor SVG, footer 좌측 페이지번호와 비충돌).
+- **단일 도구**: 안티그래비티/GEMINI.md 전면 제거 → Claude Code (CLAUDE.md / `.claude/agents` / `.claude/skills`). 80→77슬라이드(Interlude ×3 제거).
+- **발표자**: 동료(프로) 톤 + 사내 세션 프레이밍(시즌→세션).
+
+### B. 재사용한 효율 기법 (다음에도 유용)
+1. **accent 별칭 수렴**: `:root` 에서 `--accent-purple/cyan/amber`(+`-10/-20`) 를 **전부 민트값으로 재정의**(별칭). 본문 241개 `var(--accent-*)` 참조를 손대지 않고 일괄 단색화. 리터럴 hex/rgba(`#A855F7`, `rgba(249,115,22,…)` 등) 만 PowerShell `-replace` 로 mint 치환.
+2. **그라디언트 패턴별 flat 치환**: `linear-gradient(135deg…)`→transparent(로고박스), `(160deg…)`→`var(--bg-surface)`(카드), `(90deg…)`→transparent(상단 4px 띠 제거), `radial-gradient`→transparent(glow). PowerShell `[regex]::Replace` + 클래스 `[^;"}]*` 로 단일 그라디언트 값 안전 매칭.
+3. **footer 전량 재기입**: `[regex]::Replace` 카운터로 `.page` div 76개를 문서순 `02…77 / 77` 일괄. Cover 는 `.page` 없어 자동 스킵. (R-24 의 역순 시프트보다 신규 파일엔 전량 재기입이 안전.)
+4. **PowerShell UTF-8 무BOM 저장**: `[System.IO.File]::WriteAllText($p,$t,(New-Object System.Text.UTF8Encoding($false)))` — 한국어 HTML 인코딩 보존.
+
+### C. 신규/강화 학습
+- **R-9 (한국어 mono 금지) 재확인**: Claude Code 폴더트리에서 `← 취업규칙` 류 한글 주석은 mono 부모 안에 두면 Malgun fallback 으로 깨짐. **주석 span 만 `font-family:var(--font-body)` 분리**. 파일명(`CLAUDE.md`, `.claude/agents`)은 mono 유지.
+- **대형 디스플레이 클래스 폰트 누락 주의**: `.cover-big/.s-title .big/.s-divider .num/.s-bignum .big` 등은 자체 클래스라 `--font-head` 미지정 시 본문(Body) 상속. 헤드 폰트를 묶음 셀렉터로 명시 강제 필요.
+- **병렬 덱 변형의 sync 격리**: BroadcastChannel 채널명을 `ai_literacy_sync` → `ai_literacy_sync_v2` 로 index2/Prompter2 양쪽 동시 변경. iframe `src` 도 index2 로. 검증: Prompter2 헤더 `LIVE SYNC ACTIVE` 점등 확인.
+- **단일 도구 전환 시 R-18 자동 해소**: 2개 도구(A안/B안) 선언이 사라지면 슬라이드별 "어느 도구 기준" 재선언 부담도 사라짐. 대신 도구별 정확 경로(`.claude/agents/*.md`, `.claude/skills/<name>/SKILL.md`, `.claude/settings.json`)는 web 검증으로 확정(R-17).
+- **설치/요금 사실 검증(R-17)**: Claude Code 네이티브 설치기(`irm …install.ps1|iex` / `curl …install.sh|bash`, Node.js 불필요), 로그인=`claude`+계정, 요금 Pro $20·Max $100~$200(전부 포함). 사용량 한도 단서 1줄 동반(R-21).
+
+### D. 남은 알려진 사항
+- index2 의 인라인 `font-size` 중 26/27/30/34/36/44px 등 **타입스케일 외 값 다수는 원본 index.html 에서 상속**된 것(본 변형에서 신규 도입분은 전부 허용값). "조금 조정" 범위라 전체 리팩터는 미실시 — 추후 통합 정리 대상.
+
+---
+
+## 2026-06-20 (리파인) — index2 무채색 전환 + 타입 강화 + AP 예시
+
+### A. 피드백 → 조치
+- **"형광색 없애"**: 민트 `#99EADC` 가 사용자에게 형광으로 읽힘 → **완전 무채색**(흑·백·회). `:root` 의 `--accent*` 전부 `#FFFFFF`/white-alpha, 리터럴 `#99EADC`·`rgba(153,234,220,…)` 글로벌 → 흰색. 레퍼런스 덱(`design/Cheil_Design.md` §7) 의 "강조 극소 모노톤" 과 정합.
+- **"AI 가 상자 안에 있는 느낌 싫다"**: 좌상단 브랜드마크 `AI` 박스 → `.brandmark .logo{display:none!important;}` 한 줄로 Cover+모든 챕터 오프너 일괄 제거(텍스트 라벨만).
+- **"세션 같은 거창한 단어 금지"**: `제일기획 · 사내 AI 리터러시 세션` → `제일기획 · AI 리터러시`. 단 "사내 보고서/사내 도입" 같은 **자연스러운 일반 용법의 '사내' 는 유지**(브랜딩 용 거창함만 제거).
+- **"재건축 예시가 제일기획 AP 와 안 맞음"**: Context Template "내 회사로 채워보면" + Company Detail + Three Kinds Grid 의 예시를 **광고/AP 세계**(시장·소비자 심층 조사 → 인사이트 → 전략·크리에이티브 제안, 광고주, 경쟁 PT, 금지어 '요즘 트렌드/혁신적인/차별화')로 교체.
+- **"타입 위계 Playwright 로 점검 + 폰트 더 커도 비율 맞추라"**: 대표 슬라이드 캡처로 위계 확인. 기존 스케일(Cover 200 / 챕터 176 / 제목 80 / 본문 28)이 이미 §3 TYPE_SCALE·§4 비율을 만족 → **형광/박스 제거만으로 위계가 또렷하게 읽힘**(추가 확대 불필요, overflow 리스크 회피).
+
+### B. 재사용 기법
+- **무채색 3계조 규칙**: 형광 제거 후에도 "강조 vs 평문" 구분이 필요 → CSS 묶음 셀렉터로 `열거 번호/라벨(toc-num·cnum·hnum·snum·bullet idx)` 만 `--text-secondary !important` 로 후퇴시키고, 코드·파일명·핵심 em·대형 디바이더 번호는 흰색 유지. `!important` 로 인라인 `color:var(--accent-*)` 잔재를 한 번에 제압.
+- **카드 라운딩 일괄 완화**로 "이전 티"↓: `border-radius:32px→20px`, `28px→18px` 글로벌(작은 UI 라디우스 16/14/12 는 보존).
+- **Prompter UI 색 충돌 주의**: 텔레프롬프터 `--accent` 는 slide-num 색(밝아야)과 btn-hover 배경(어두워야)에 동시 사용 → 흰색으로 두면 hover 글자가 안 보임. **회색 `#8E8E93`** 으로 두면 둘 다 성립. (audience 비노출 도구지만 형광 제거 일관성 위해 변경.)
+
+### C. 검증 결과
+민트 0 / 세션 0 / antigravity·gemini 0 / 재건축·HR SaaS·제조업 0 / @font-face 14 / data-label 77 / footer 전부 /77 / 한글 in mono 0 / **R-12 77=77** / Prompter2 LIVE SYNC ACTIVE. 원본 `index.html`·`Prompter.html` 불변.
+
+---
+
+## 2026-06-20 (리파인 2) — 위계 반전 + 표지/목차 분리 + 플로우차트 + 디테일 강조
+
+### A. 피드백 → 조치 (펀치리스트 14건)
+- **표지 다글다글** → Cover 의 4챕터 TOC 제거(타이틀만), 다음에 **목차(Agenda) 슬라이드 신설**(챕터별 개념명 + 한 줄 설명). (+1슬라이드)
+- **챕터 표지 < 섹션 구분 위계 거꾸로** → 챕터 오프너를 **흰 배경 반전**(`section.s-title{background:#FFFFFF;color:#0E0E0E}` + 로고 `filter:invert(1)`)으로 띄워 섹션 디바이더(검정)보다 위로. **흰 슬라이드는 우하단 흰 로고가 사라지므로 `::after{filter:invert(1)}` 필수.**
+- **챕터 제목이 서술형** → big=개념명(프롬프트/컨텍스트/에이전틱 엔지니어링·실행편), sub=서술형 설명으로 분리.
+- **'삽질로 배우는'** → '직접 해보며 배우는' 으로 순화(회사용).
+- **박스 안에 글자 디자인 지양** → `.bullet .idx` 의 박스(bg/border-radius/56x56) 제거 → 플레인 mono 글리프(회색).
+- **쌍따옴표 불일치** → `.s-quote .mark` 글리프를 `"`(straight)→`“`(curly)로 통일 + 인라인 색 제거(전부 tertiary 회색). 폰트가 straight `"`를 두 막대로 렌더해 튀었음.
+- **57~58p 기계적** → `.flow` 컴포넌트(노드+세로/가로 연결선+CSS삼각 화살촉+엣지라벨 bg마스크)로 **mermaid 느낌** 재구성.
+- **67p 조직도 선 끊김** → 가로 연결바 `left:17%/right:17%` → **`15%/15%`**(자식 3개가 width:30% space-between 이라 중심이 15/50/85% — 바가 외곽 자식 중심까지 닿아야 연결). 
+- **55p 푸터 침범** → 표+불릿 컨테이너 `justify-content:center;flex:1` → **`flex-start`(또는 flex:none)** 로. flex:1+후행 caption 조합은 caption 을 푸터로 밀어냄(구조적 함정).
+- **26p 사례 광고화** → 광주 호텔 → **Dove 카피 사례**(비누 Dove[유니레버] vs 초콜릿 Dove[마스] 혼동). 사용자가 'P&G Dove'라 했으나 Dove 비누는 유니레버 — **할루시네이션 강의 슬라이드라 사실 정확성 사수**(P&G 미표기).
+- **28p 디테일 강조** → Restaurant '컨텍스트와 함께' 추가 정보에 `<u>` 밑줄(전역 `u{}` 스타일: offset 5px, thickness 2px, 흰 0.55). "밑줄=왼쪽엔 없던 정보" 주석.
+- **10~11p** → 슬랙→업무 카톡, 팀장→팀장님, '이번 분기 정리해줘'→'이번 분기 주요 이슈 정리해줘'.
+- **interlude 잔재** ('Ch.03 … 잠시 후 시작합니다') 제거.
+- **76~77p 삭제**(End, Survey QR) → QnA 가 마지막.
+
+### B. 슬라이드 수 변동 회계
+77 → +1(Agenda) −2(End,Survey) = **76**. footer 전량 재기입(`/ 76`), cover-meta 76, Prompter2 = Agenda 추가/End·Survey 삭제 → **R-12 76=76**.
+
+### C. 재사용 교훈
+- **`u{}` 전역 스타일** 추가 시 `<u>` 짝 검증 필수(`grep -c '<u>' == grep -c '</u>'`) — 미닫힘 1개면 이후 전 슬라이드 밑줄 오염.
+- **큰 굵은 한글 제목이 JPEG 스크린샷에서 밑줄처럼 보이는 건 아티팩트** — `getComputedStyle(el).textDecorationLine` 으로 실측 확인(여기선 전부 none).
+- **흰 반전 슬라이드** 도입 시 체크: 텍스트색·brandmark·footer·로고(::after filter) 4종 모두 반전.
+- PowerShell 글로벌 치환은 정규식이라 한글 텍스트(특수문자 `.?()'`)는 **`.Replace()`(리터럴)** 사용. 인덱스/페이지 재번호는 `[regex]::Replace` + MatchEvaluator 카운터.
+
+---
+
+## 2026-06-20 (도입부) — Section 00 인트로 4장 추가
+
+- `AI에이전트_도입부_Section00_제작가이드.md`(화면카피·대사·팩트시트 자기완결 명세) 기반으로 **도입부 4장** 신설: 0-A 「어명이오」 훅 → 0-B 「스스로 정하면 에이전트」 3단 사다리 → 0-B½ 「주방」 비유(마누스 배달 / 헤르메스·오픈클로 빈 프로 주방 / 클로드 코드 내 주방) → 0-C 「빌리지 말고 깔아라」(보인다·맞는다·통제된다 → "그래서, 클로드 코드").
+- **배치**: Cover **다음**, Agenda **앞** (Cover → S00×4 → Agenda → Ch1). 가이드의 "S00-4 → 본편" 핸드오프는 대사 마지막 줄을 "오늘 갈 길 펼쳐 보고… 말 거는 법부터"로 조정해 Agenda 경유 자연 연결.
+- **디자인**: 기존 무채색 그대로 상속. 강조 3블록(사다리 top / 주방 3번째 / 클로즈)은 **흰 테두리 + rgba(255,255,255,0.06) 배경**으로만 — 색 없이 위계. 인라인 font-size 전부 허용값(24/28/40/56/96).
+- **flex:1 + 후행 caption 함정 회피**: 사다리·주방 컨테이너를 flex:1 안 주고 자연 높이(top-align)로 둬 caption/footer 비충돌(이전 55p 교훈 적용).
+- 슬라이드 76→**80**. footer 전량 `/80` 재기입, cover-meta "도입 + 4개 챕터 · 80". Prompter2 동일 위치에 4 대본 삽입(대사는 가이드 [발표 대사] 사용). **R-12 80=80**, scripts.length=80, LIVE SYNC ACTIVE 확인. 원본 2파일 불변.
+- 사실성: 마누스(중국계, Meta 인수 무산)·헤르메스(Nous, MIT, self-host)·오픈클로(Steinberger) — 가이드 §6 팩트시트 근거. 마누스 중국 인프라는 "주방이 어디 있는지조차 확인 안 됨"으로 **은유 처리**(직접 국가 언급 자제).
+
+---
+
+## 2026-06-20 (도입부 리파인2) — 직관성·외주비유·Claude차이·앞단순서
+
+- **3p `Agent Definition` 직관화**: 추상 '길' → **구체 예시 + "다음 수 → 누가" 태그 칼럼**(매크로=사람이 미리 / AI자동화=매번 사람 / 에이전트=AI 그때그때) + caption 자율주행 앵커("도구는 매 단계 내가 운전, 에이전트는 목적지만 주면 자율주행"). 3열 grid(유형/예시/판단주체).
+- **4p `Famous Agents` 비유 교체**: 주방 → **외주 vs 인하우스**(광고대행사 직결). 마누스=턴키 외주 / 헤르메스·오픈클로=검증 안 된 신생 외주에 회사 자료 통째로 / 클로드 코드=직접 브리핑해 데리고 일하는 인하우스 팀(흰 강조).
+- **5p `Why Build It` 3건**: (a) **"제일기획의 공식 도구" 삭제**(사실 아님) → "공식 도입은 아직 — 그래서 지금 미리" 톤, (b) **Claude(대화) vs Claude Code(행동) 그라운딩 박스** 추가(헤드라인 아래), (c) "보인다/맞는다/통제된다"(번역투) → **"훤히 보인다 / 우리한테 맞춘다 / 고삐는 내가 쥔다"**.
+- **앞단 순서**: 사용자 지적 — 표지(1p)와 목차가 인트로로 갈라져 어색. → **Cover → 목차(Agenda) → 인트로 4장 → 1편** 으로 Agenda 를 인트로 앞으로 이동(원래 의도 복원). `Why Build It` 대본 핸드오프도 "오늘 갈 길 펼쳐 보고" 삭제 → "말 거는 법부터 — 1편입니다." 1편 직결.
+- **공식 도구 주의**: 가이드 §0 은 "클로드=공식 도구"라 했으나 **사용자가 사실 아님으로 정정** → 본문/대본 모두 도입 대비 톤. (단 "Anthropic 공식 AI 코딩 에이전트"=사실, 준비물에 유지.)
+- 슬라이드 80 불변. Agenda 이동으로 footer 전량 재번호(Agenda=02). **R-12 80=80, 순서 1:1, LIVE SYNC ACTIVE.** 무채색·허용폰트·원본 2파일 불변.
+- **Edit 로 항목 삭제 후 인접 줄 병합 주의**: 선행 `\n` 포함 매칭 삭제 시 다음 엔트리와 한 줄로 붙음 → `[regex]::Replace('},[ ]{2,}\{ title:' , '},<NL>...')` 로 복원(이전 교훈 재적용).
+
+---
+
+## 2026-06-20 (폰트 감사) — 한글이 mono 로 렌더되던 버그 일괄 수정
+
+- **증상**: 3p eyebrow("INTRO · 한 장으로 끝내는 에이전트"), 4p 외주카드 라벨(마누스/헤르메스·오픈클로/클로드 코드), 18p Four Ingredients 예시 카드(너는 SaaS…) 등에서 **한글이 JetBrains Mono → 시스템 모노 fallback** 으로 떨어져 자간 벌어진 흉한 렌더. (playbook §2.3 화이트리스트=Samsung SS + ChosunilboNM 뿐, mono 는 라틴 전용.)
+- **근본 원인 2가지**: (1) 인라인 `font-family:var(--font-mono)` 가 한글 텍스트에 직접 적용(eyebrow, 외주 라벨). (2) **CSS 클래스 `.card .ex` / `.card .cnum` 가 mono 인데 한글 예시/라벨을 상속** — 인라인 grep 으로는 안 잡히는 케이스.
+- **수정**:
+  1. **안전망**: `--font-mono` 폴백에 Samsung SS KR 삽입 → `"JetBrains Mono","Samsung SS Body KR","Samsung SS Body","Malgun Gothic",ui-monospace,monospace`. JetBrains Mono 가 **라틴 전용(한글 글리프 없음)** 이라 한글 글리프는 자동으로 Samsung SS Body KR 로 폴스루(라틴은 mono 유지). 글리프 단위 폴백.
+  2. `.card .ex` / `.card .cnum` → `--font-body` (한글 예시/라벨 전부 Samsung SS Body). 단 Concept-to-File 등 **라틴 경로 span 은 인라인 mono 라 그대로 유지**(class 변경에 안 먹힘) — 의도된 분리.
+  3. 인라인 mono 한글 직접 적용분(eyebrow→Samsung SS Head, 외주 라벨 3개→Samsung SS Body) 제거.
+- **JetBrains Mono 유지 근거**: 라틴 코드/경로/숫자/폴더트리(├──└── 정렬) 한정. 한글은 0건. (playbook 위주 + 라틴 코드 기능 예외.)
+- **검증법**: 인라인은 `grep 'font-family:var(--font-mono)[^>]*>[^<]*[가-힣]'`, **CSS 상속분은 클래스 정의를 직접 점검**(인라인 grep 사각지대). 최종 strict=0, 무채색 0, 80슬라이드·@font-face 14 유지, 원본 불변. Playwright 로 3p·4p·18p 클린 렌더 확인.
+
+---
+
+## 2026-06-20 (도입부·간지·레이아웃 정리 + 전수 오버플로 스윕)
+
+- **장식용 폰트 선별 적용 (Intro Hook 결의 줄)**: 사용자가 특정 한 줄("효시일체, 1인 1에이전트 하랍신다")에 한해 `design/fonts/ttf/Griun_PolSensibility-Rg.ttf`(붓글씨 감성체) 지정. @font-face 1개 추가(ttf 직접 `format("truetype")`), 해당 줄에만 `font-family:'Griun PolSensibility','Samsung SS Head KR',sans-serif;font-weight:400`. **주의**: (1) 장식체는 Regular만 있어 `font-weight:700` 상속 시 합성볼드로 추해짐 → 반드시 400 명시. (2) 한자 글리프 미보장 → 결의 줄에서 한자(嚆矢一體) 빼고, 한자 풀이는 Samsung SS(한자 지원) 쪽 gloss로 분리. playbook 화이트리스트(Samsung SS/ChosunilboNM) 예외지만 **사용자 명시 지정이므로 1줄 한정 허용**.
+- **위계 재배치 = 절대크기 아닌 대비**: "어명이오!"(160) > 결의 줄(80, 장식체) > 풀이(24, tertiary, 우하단 absolute). gloss는 `position:absolute;right:100px;bottom:104px;text-align:right`로 Cheil 로고(우하단 right:60 bottom:40) 위에 안 겹치게.
+- **간지(s-title) 일괄 정비**: (1) `.s-title{justify-content:flex-end→center}` 한 줄로 4개 간지 전부 세로 중앙. (2) 시리즈 kicker("직접 해보며 배우는 AI 리터러시 · N편") 4개 모두 제거 — 챕터 넘버는 brandmark("Chapter 0N · of 04")가 이미 담당하므로 중복. (3) sub 카피는 첫 문장 절 뒤에서 `<br>` 1회로 2줄 균형(의미 단위 줄바꿈).
+- **모호 단정 카피 → 명시적 사실로**: "채팅창의 1차 기능은 아닙니다"(모호) → "원래 '1:1 대화'용입니다"(정체성 명시 = 한계 함의, 비단정). 동반 bullet의 단정형("병렬 실행 불가")도 R-20대로 "기본 동작이 아닙니다"로 톤다운. **슬라이드 카피 변경 시 Prompter 대본의 동일 표현("1차 기능은 이게 아닙니다")도 함께 교체**(인덱스/라벨 불변이라 R-12 카운트는 그대로지만 text 동기화 의무).
+- **무채색에서 "상위/다음 개념" 강조법**: 색을 못 쓰므로 (a) 카드 elevation(`bg-elevated`), (b) 밝은 흰 테두리(rgba .55), (c) 상단 4px 흰 띠(absolute child — border-left 금지룰과 무관, 상/하단 띠는 허용), (d) "→" 진행 화살표 칼럼(`grid-template-columns:1fr 88px 1fr`), (e) "오늘의 목적지" 마커, (f) 좌측 카드는 테두리·문구 recede. 이 6개를 합치면 색 없이도 명확한 위계.
+- **읽혀야 할 본문에 text-tertiary 금지**: tertiary(#5A5A60)는 footer 페이지번호·"반복…" 같은 진짜 보조용만. 청중이 읽어야 하는 "나쁜 출력 예시" 본문이 tertiary면 너무 옅음 → secondary(#8E8E93). **전역 tertiary 값은 건드리지 말 것**(footer 등 의도된 옅음 깨짐) — 인스턴스별 교체.
+- **flow 다이어그램 키울 때 세로 예산 주의**: 노드 키우고 카드에 "예시" 줄까지 추가하면 카드가 길어져 하단 caption이 footer 침범. **정량 검증 필수**: Playwright로 `caption.bottom - footer.top` 측정 후 edge height(62→40~44)·padding·margin 미세 축소로 ~40px 확보. 63p·62p 둘 다 이 패턴으로 해결.
+- **전수 오버플로 스윕 기법**: 80장 `goTo(i)` 순회하며 **leaf 텍스트 노드만**(자식 있는 컨테이너 제외 — 카드 배경 box가 footer 근처까지 내려오는 건 정상, 오탐의 주범) 대상으로 (우측 padding 초과 / footer 밴드 침범 / 슬라이드 하단 초과) 검사. 컨테이너 포함 시 오탐 3건 → leaf-only로 실제 1건(62p)만 검출. 최종 "ALL CLEAR".
+
+---
+
+## 2026-06-20 (2차 레이아웃 정리 — footer 침범·다이어그램 간격·슬라이드 삭제·인용 간격)
+
+- **footer 침범의 두 원인 구분**: (1) flex:1 카드가 콘텐츠 min-content보다 작은 공간에 눌려 박스가 footer로 흘러넘침(37p) → `flex:none` + 폰트(28→24)·gap(20→16)·padding(48→36) 축소로 자연 높이를 줄임. (2) `line-height` 과대(72p 트리 `line-height:2`) → 1.7로. **정량 측정이 답**: `el.bottom - footer.top` 으로 침범 px 측정 후 그만큼 트림. leaf 텍스트가 아닌 **컨테이너 박스**가 침범해도 시각적으로 페이지번호와 붙어 보이니, 박스 기준(`*` 순회)으로도 측정.
+- **flow edge 라벨 겹침 = 높이 부족**: `.flow .edge` 안에 라벨(top:50% 중앙)과 화살촉(bottom)이 같이 있으면, edge 높이 H가 작을 때 겹침. 무겹침 조건 ≈ **H ≳ 라벨높이+화살촉+여유 ≈ 52px**. 40px로 줄였더니 사람판단 라벨이 화살촉과 붙음(63p) → 56px로. **footer 여유와 trade-off**라 measure→edge↑→다른 margin 미세↓로 균형.
+- **인용 mark(큰 따옴표)의 거대 공백 = line-box 잔여공간**: `.s-quote .mark` 280px / `line-height:0.8` 이면 line-box 224px인데 " 글리프는 상단 ~1/3만 차지 → 아래 빈 공간 + margin이 본문과 큰 간격을 만듦. **`line-height`를 0.5로** 줄이면 box가 글리프에 밀착, 본문이 바로 아래로(요청 "0.5cm"). margin-bottom은 0. (글리프는 box 밖으로 overflow하지만 시각만, 레이아웃은 box=line-height 기준이라 본문이 당겨짐.)
+- **슬라이드 삭제 + 재번호(R-24) 실전**: 78p(Five Takeaways) 삭제 → 79장. 순서: (1) 섹션 블록 제거, (2) **분모 변경 전에** 꼬리 두 장 numerator를 유니크 풀스트링으로 먼저 교체(`79 / 80`→`78 / 79`, `80 / 80`→`79 / 79`) — 분모가 아직 /80이라 충돌 없음, (3) 남은 전체 `replace_all ' / 80</div>'→' / 79</div>'`, (4) Cover meta `80→79 슬라이드`, (5) Prompter2 해당 객체 1줄 제거.
+- **Prompter 객체 제거 시 merge 버그 방지**: 삭제할 엔트리 줄을 **다음 엔트리 시작과 함께** 매칭해 교체(`...겁니다.\` },\n        { title: "Final Closing",` → `        { title: "Final Closing",`)하면 빈 줄·병합 없이 깔끔. R-12 검증 시 `^        { title:` 라인수로 세되, **`{ title: ` 단순 occurrence는 JS 파서 코드(`result.push({ title: ...})`)까지 잡아 +2 과다 계상**되니 라인수 기준이 정확.
+- **footer 연속성 검증**: leading-zero(`02`) 때문에 grep/sort가 꼬일 수 있음. `class="page">N / 79` 추출 → `uniq -c`로 중복, `seq`와 비교로 누락 확인. 최종 02..79 연속 + Cover(footer 없음) = 79장.
+- (참고) 78p는 R-23의 "액션 아이템" 장이었음 → 사용자 명시 삭제로 마무리 시퀀스는 [한계·비용(77)→마치며(78)→QnA(79)]로 축약. 사용자 > governance 룰.
+
+---
+
+## 2026-06-20 (표지 리브랜딩 + 도입 quote 슬라이드 + 오디오 큐 + 로고 삽입)
+
+- **슬라이드 삽입(insert) 재번호(R-24) — bump 방향 주의**: 신규 1장을 4번 위치에 삽입 → 80장. 순서: (1) **삽입 전에** 기존 numerator를 PowerShell `[regex]::Replace` + MatchEvaluator로 일괄 처리 — `n>=4면 +1`, 분모 79→80 동시에. (2) 그다음 신규 섹션을 `04 / 80`으로 삽입(이미 bump된 05 앞). 삭제(R-24)는 "역순 시프트"였지만 **삽입은 임계값 이상 전부 +1** 한 번에 끝. 분모는 `'{0:00} / 80</div>' -f $n`로 2자리 zero-pad 유지.
+- **PowerShell 수정 후 Edit 실패**: PowerShell로 파일을 쓰면 Edit 도구가 "modified since read"로 거부 → 수정 영역을 **Read 한 줄 다시 읽고** Edit. (renumber=PowerShell, 콘텐츠 삽입=Edit 조합 시 항상 발생.)
+- **deck-stage 슬라이드 진입 이벤트 = `window` `message`의 `slideIndexChanged`**: 오디오/효과를 특정 슬라이드 진입에 걸려면, 기존 Prompter sync 브리지의 `window.addEventListener('message', ...)`에서 `d.slideIndexChanged` 분기에 훅을 추가. **인덱스가 아니라 `slides[idx].dataset.label`로 판정**(나중에 재배치돼도 안 깨짐). 진입 시 타이머 set, 이탈 시 `clearTimeout`+`pause/currentTime=0`. 초기 위치(`stage.index`)에도 동일 호출.
+- **브라우저 오디오 자동재생**: `new Audio('x.mp3')`는 detached(DOM 밖)라 `querySelector('audio')`로 안 잡힘. 발표 중엔 사용자 네비게이션(키/클릭)이 user-gesture라 3초 지연 `play()` 허용됨. `play()`는 항상 `.catch(()=>{})`로 reject 무시. 헤드리스 검증은 **`slideIndexChanged` 발화([0,3]) + 해당 idx label 확인**으로 배선만 검증(실제 소리 X).
+- **다크덱 로고 삽입 — 파일별 처리**: 투명 PNG라도 잉크 색이 관건. (1) **검정 일러스트(hermesagent)=다크 배경서 안 보임 → `filter:invert(1)`**. (2) 흰색 로고(manus)=그대로. (3) 컬러 마스코트/마크(openclaw 빨강, claude 주황)=그대로 노출(브랜드 인용은 무채색 룰 예외). `<img height:34~46 object-fit:contain>`, 카드 하단은 `margin-top:auto`로 정렬. **공백 있는 파일명**(`claude logo.png`)도 src에 그대로 쓰면 됨(브라우저가 인코딩).
+- **표지 세로 중앙정렬**: `.s-cover{justify-content:space-between→center;padding 대칭}` + 상단 brandmark 줄(`.cover-top`)을 `position:absolute;top/left/right`로 띄워 흐름에서 빼면, 가운데 타이틀 블록만 수직 중앙. (cover 전용 클래스라 안전.)
+- **긴 영문 표지 타이틀**: `.cover-big`(200px)는 한글 단어용 → 영문 장문은 인라인 `font-size:160px`(허용값)로 낮춰 2줄. letter-spacing -0.045em이 폭을 잡아줘 22자도 1720 안에 들어옴. `<title>` 태그도 같이 교체(탭 일관성).
+
+---
+
+## 2026-06-20 (인용 위계 통일 + 채움답 밑줄 + 카드 상단정렬)
+
+- **s-quote 통일 패턴**: eyebrow를 마크 위에서 빼서 **cite 블록 첫 줄(letter-spacing 0.06em lead)로 이동** → 마크 → 본문(q) → [라벨+cite] 하단 묶음. "같은 위계로" = 라벨을 cite와 같은 회색·크기 패밀리로(letter-spacing만 살짝). 5개 s-quote 전부 동일 처리. 무채색이라 eyebrow의 amber/cyan/purple 변형은 어차피 text-secondary로 수렴 → 색 손실 없음.
+- **상단/하단 따옴표 위계 일치**: 풀쿼트 박스는 여는 마크(좌상 80px tertiary)와 닫는 마크가 따로 놀기 쉬움(닫는 게 본문 끝 인라인 28px). **닫는 마크도 동일 80px tertiary로 별도 div, `text-align:right`** 줘서 좌상-우하 대칭. 여는 " (U+201C) / 닫는 " (U+201D) 구분.
+- **'채워진 답' 밑줄**: 템플릿 빈칸 대비 실제 채운 답을 `text-decoration:underline;text-underline-offset:5px;`로. **scope 검증 필수** — `<b style="color:var(--accent-purple);">`가 정확히 그 카드에만 5개인지 grep -c로 확인 후 replace_all. (전역 `u{}` CSS 규칙이 grep line-count에 +1 잡히는 건 무관.)
+- **카드 상단정렬**: `justify-content:center→flex-start`. `align-items:stretch`라 두 카드 높이는 같고(긴 쪽 기준), 짧은 카드는 하단 여백이 생김(의도된 정렬). 콘텐츠 양 불변이라 footer 침범 없음.
+
+---
+
+## 2026-06-20 (낭송 순차 강조 애니메이션 + 음악 토글 버튼)
+
+- **슬라이드 단위 순차 강조(낭송 효과)**: 본문을 `<span class="recite-seg">`로 세그먼트화(줄 안에서도 분리, 사이 구두점은 plain text=회색 유지). CSS는 `.recite-seg{transition:color/transform;display:inline-block}` + `.recite-seg.on{color:#fff;transform:scale(1.1)}`. **transform:scale는 reflow 없음** → 이웃 세그먼트 안 밀림(글자만 시각적으로 커짐). 컨테이너 flex `gap:18px`면 1.1배 확대해도 윗줄/footer 안 침범. JS는 `setTimeout` 3초 간격으로 `.on`을 다음 세그먼트로 옮기며 `%length`로 **루프**(머무는 동안 계속). 진입 시 `startRecite()`, 이탈 시 `stopRecite()`(타이머 clear + 전부 회색 복귀).
+- **데크 내 인터랙티브 버튼(음악 끄기)**: 슬라이드에 `<button id="cue-mute" data-on="1">`. 브리지 스크립트에서 `addEventListener('click')`로 토글 — on=1이면 stop+라벨"음악 켜기", on=0이면 play+"음악 끄기". `Audio` 객체와 타이머는 IIFE 클로저에 두고 `stopCueAudio()/playCueAudio()` 헬퍼로 버튼·자동재생·슬라이드훅이 공유. 자동재생 타이머는 `if(muteBtn.dataset.on==='1')` 가드로 "끄기 누른 뒤엔 3초 후에도 안 켜짐" 보장. 진입 시 버튼 라벨 리셋.
+- **R-12 grep 함정**: JS에 `querySelectorAll('section[data-label="..."]')`를 쓰면 `grep -c data-label=`가 +1 과다 계상(81로 보임). **`grep -cE '<section class="slide'`로 실제 섹션만** 세야 정확. (낭송/오디오 훅처럼 data-label로 슬라이드를 찾는 JS가 생기면 항상 발생.)
+- **표지 미니멀화**: cover-top(brandmark) 통째 제거 후에도 `.s-cover{justify-content:center}` + cover-mid만 남아 수직 중앙 유지(cover-top이 absolute였어서 흐름 영향 0). 긴 영문 타이틀은 160px 인라인.
+
+---
+
+## 2026-06-20 (낭송 슬라이드 보강 — 겹침 해결·스피커 아이콘·1회 재생)
+
+- **transform:scale 강조의 겹침 = 같은 줄 이웃 침범**: scale(1.1)은 박스는 그대로 두고 글자만 키워서, **한 줄에 세그먼트 2개면 커진 쪽이 옆 세그먼트를 덮음**(특히 긴 세그먼트). 해결: **세그먼트 1개당 1줄**로 분리(가운데 정렬). 가로 이웃이 없어 겹침 원천 차단, 긴 줄도 scale 후 우측 여백 500px 확보. (대안인 font-size 리플로우는 줄 폭이 넘쳐 위험 → 비채택.)
+- **이모지 금지 환경의 아이콘**: 스피커/뮤트는 🔊🔇(이모지) 금지 → **인라인 SVG**로 직접 그림. 스피커콘(filled path) + `.spk-on`(음파 arc 2개) / `.spk-off`(X 2선) 그룹을 두고, `#cue-mute[data-on="0"] .spk-on{display:none}` / `.spk-off{display:inline}` CSS로 상태 스왑. 클릭 핸들러는 `data-on` 토글 + 오디오 stop/play만(텍스트 라벨 없음, aria-label만 갱신). 우상단 `position:absolute;top:44;right:64`.
+- **1회 재생(무한루프 금지) + 재진입 시 재시작**: `reciteStep`에서 `reciteIdx % length`(루프) 대신 `if(reciteIdx < length) schedule` → 마지막 세그먼트에서 타이머 안 검 = 1회만, 마지막은 켜진 채 정지. 진입 훅(`handleCueAudio`)이 매번 `stopRecite()`(타이머 clear + `.on` 제거) 후 `startRecite()`(idx=0)라 **재진입마다 처음부터** 다시. 이탈 시에도 다른 슬라이드의 handleCueAudio가 stopRecite 호출.
+- **deck-stage 이탈 정리는 async**: `goTo(other)` 직후 동기 검사하면 `slideIndexChanged`(postMessage)가 아직 안 와서 `.on`이 남아 보임(오탐). ~300ms 후 검사하면 정상 클리어 확인됨. 정리 로직 검증은 딜레이 필수.
+
+---
+
 ## (다음 작업 추가 예정)

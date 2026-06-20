@@ -18,3 +18,16 @@ desktop.ini
 .idea/
 *.swp
 *~
+
+# Heavy design source not needed for the published deck
+design/references/
+design/fonts/ttf/SamsungSS*.ttf
+# screenshot scratch from verification
+font-*.jpeg
+v-*.jpeg
+n-*.jpeg
+f-*.jpeg
+g-*.jpeg
+q-*.jpeg
+c*.jpeg
+intro-hook.jpeg
